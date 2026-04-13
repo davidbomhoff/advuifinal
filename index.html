@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Essay Pad</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <header>
+    <h1>Essay Pad</h1>
+    <div class="header-actions">
+      <button class="btn btn-outline btn-sm" id="btn-copy" title="Copy essay text">Copy</button>
+      <button class="btn btn-primary btn-sm" id="btn-download" title="Download as .txt">Download</button>
+      <button class="btn btn-danger btn-sm" id="btn-clear" title="Clear the essay">Clear</button>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Statistics bar -->
+    <div class="stats-bar" aria-label="Essay statistics">
+      <div class="stat">
+        <span class="stat-value" id="word-count">0</span>
+        <span class="stat-label">Words</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-value" id="char-count">0</span>
+        <span class="stat-label">Characters</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-value" id="sentence-count">0</span>
+        <span class="stat-label">Sentences</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-value" id="para-count">0</span>
+        <span class="stat-label">Paragraphs</span>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat">
+        <span class="stat-value" id="read-time">—</span>
+        <span class="stat-label">Read time</span>
+      </div>
+    </div>
+
+    <!-- Essay editor -->
+    <div class="editor-wrapper">
+      <div class="editor-toolbar">
+        <span class="toolbar-label">Essay</span>
+      </div>
+      <textarea
+        id="essay-textarea"
+        placeholder="Paste or type your essay here…"
+        spellcheck="true"
+        aria-label="Essay text area"
+      ></textarea>
+    </div>
+
+    <!-- Extended readability stats -->
+    <div class="readability-section" aria-label="Readability details">
+      <h2>More Stats</h2>
+      <div class="readability-grid">
+        <div class="readability-item">
+          <div class="label">Avg. word length</div>
+          <div class="value" id="avg-word-len">—</div>
+        </div>
+        <div class="readability-item">
+          <div class="label">Unique words</div>
+          <div class="value" id="unique-words">—</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    Essay Pad &mdash; paste, write, and review your essay
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
