@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Designer's Edge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@300;400;600&family=Libre+Franklin:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ── */
+:root {
+  --bg:#0d0f14; --surface:#13161e; --surface2:#1a1f2c; --border:#252b3a;
+  --accent:#5b8cff; --accent2:#ff6b6b; --accent3:#4ecdc4; --gold:#f5c842;
+  --text:#e8eaf2; --muted:#6b7494; --code-bg:#090b10;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'Libre Franklin',sans-serif;font-weight:300;line-height:1.75;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:.5;}
+
+/* ── PROGRESS + NAV ── */
+#progress{position:fixed;top:0;left:0;height:2px;width:0;background:linear-gradient(90deg,var(--accent),var(--accent3));z-index:1001;transition:width .1s;}
+nav{position:fixed;top:0;left:0;right:0;height:50px;display:flex;align-items:center;padding:0 2.5rem;gap:2rem;background:rgba(13,15,20,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);z-index:100;font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:.08em;}
+nav .logo{color:var(--accent);font-weight:600;margin-right:auto;}
+nav a{color:var(--muted);text-decoration:none;cursor:pointer;transition:color .2s;}
+nav a:hover{color:var(--text);}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:flex-end;padding:8rem 2.5rem 5rem;max-width:900px;margin:0 auto;}
+.hero-label{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--accent);letter-spacing:.15em;text-transform:uppercase;margin-bottom:1.5rem;opacity:0;animation:fadeUp .8s .2s forwards;}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(3rem,6vw,5.5rem);line-height:1.05;letter-spacing:-.02em;margin-bottom:2rem;opacity:0;animation:fadeUp .8s .4s forwards;}
+.hero h1 em{color:var(--accent);font-style:italic;}
+.hero p.lead{max-width:620px;font-size:1.05rem;color:#a0a8c0;margin-bottom:3rem;opacity:0;animation:fadeUp .8s .6s forwards;}
+.scroll-hint{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.1em;display:flex;align-items:center;gap:.75rem;opacity:0;animation:fadeUp .8s 1s forwards;}
+.scroll-hint::before{content:'';display:block;width:40px;height:1px;background:var(--muted);}
+
+/* ── CONTENT ── */
+.content{max-width:900px;margin:0 auto;padding:0 2.5rem 8rem;}
+.section-header{margin:6rem 0 2rem;}
+.section-num{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--accent);letter-spacing:.15em;display:block;margin-bottom:.6rem;}
+.section-header h2{font-family:'DM Serif Display',serif;font-size:clamp(1.8rem,3.5vw,2.6rem);}
+.body-text{font-size:1rem;color:#b0b8d0;line-height:1.85;margin-bottom:1.5rem;}
+.body-text strong{color:var(--text);font-weight:500;}
+.game-label{display:inline-flex;align-items:center;gap:.5rem;font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.75rem;}
+.game-label .dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pulse 2s infinite;}
+
+/* ── GAME SHELL ── */
+.game-shell{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:2.5rem;}
+.game-top-bar{display:flex;align-items:center;justify-content:space-between;padding:.8rem 1.25rem;background:var(--surface2);border-bottom:1px solid var(--border);}
+.game-title{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:600;color:var(--text);}
+.game-badge{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--gold);}
+.game-body{padding:1.5rem;}
+
+/* ══════════════════════════════════════════
+   GAME 1 — COLOR TOKEN STUDIO
+   Left: live clock module | Right: CSS editor
+══════════════════════════════════════════ */
+.studio-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start;}
+
+/* Clock Module */
+.clock-module{
+  background:var(--code-bg);border:1px solid var(--border);border-radius:12px;
+  padding:2rem 1.5rem;display:flex;flex-direction:column;align-items:center;gap:1.25rem;
+  position:relative;overflow:hidden;transition:border-color .3s;
+}
+.clock-module::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 0%,var(--clock-glow,rgba(91,140,255,.12)) 0%,transparent 70%);
+  pointer-events:none;transition:background .4s;
+}
+.clock-face{
+  width:140px;height:140px;border-radius:50%;
+  border:3px solid var(--clock-accent,#5b8cff);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.15rem;
+  position:relative;box-shadow:0 0 30px var(--clock-shadow,rgba(91,140,255,.2));
+  transition:border-color .4s,box-shadow .4s;
+}
+.clock-time{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:600;color:var(--clock-accent,#5b8cff);letter-spacing:.05em;transition:color .4s;line-height:1;}
+.clock-date{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;}
+.clock-label{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.clock-ticks{position:absolute;inset:0;border-radius:50%;}
+.clock-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--clock-accent,#5b8cff);
+  box-shadow:0 0 8px var(--clock-accent,#5b8cff);
+  transition:background .4s,box-shadow .4s;
+}
+.clock-token-preview{
+  width:100%;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;
+  padding:.65rem .9rem;font-family:'JetBrains Mono',monospace;font-size:.68rem;line-height:1.7;
+}
+.ctp-var{color:var(--accent);}
+.ctp-val{color:var(--accent3);transition:color .3s;}
+
+/* Swatch Presets */
+.swatch-presets{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.25rem;}
+.preset-swatch{
+  width:28px;height:28px;border-radius:6px;cursor:pointer;border:2px solid transparent;
+  transition:all .2s;flex-shrink:0;
+}
+.preset-swatch:hover{transform:scale(1.15);}
+.preset-swatch.active{border-color:white;transform:scale(1.1);}
+
+/* CSS Code Editor */
+.css-editor-wrap{display:flex;flex-direction:column;gap:.75rem;}
+.editor-label{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+.css-editor{
+  background:var(--code-bg);border:1px solid var(--border);border-radius:10px;overflow:hidden;
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.8;
+}
+.editor-header{
+  display:flex;align-items:center;gap:.5rem;padding:.5rem .9rem;
+  background:var(--surface2);border-bottom:1px solid var(--border);
+}
+.editor-dot{width:10px;height:10px;border-radius:50%;}
+.editor-filename{margin-left:.25rem;font-size:.62rem;color:var(--muted);letter-spacing:.05em;}
+.editor-lines{display:flex;}
+.line-nums{
+  padding:.75rem .6rem;background:rgba(0,0,0,.2);border-right:1px solid var(--border);
+  color:#2d364f;font-size:.72rem;line-height:1.8;text-align:right;user-select:none;min-width:2.2rem;
+}
+.editor-content{padding:.75rem .9rem;flex:1;min-height:180px;outline:none;white-space:pre;}
+.e-comment{color:#2d364f;}
+.e-sel{color:#d488cc;}
+.e-prop{color:var(--accent);}
+.e-val-static{color:var(--accent3);}
+
+/* Hex input row */
+.hex-input-row{display:flex;gap:.65rem;align-items:center;}
+.hex-preview-dot{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);flex-shrink:0;transition:background .2s;}
+.hex-input{
+  flex:1;background:var(--code-bg);border:1px solid var(--border);border-radius:8px;
+  padding:.5rem .85rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;
+  color:var(--accent3);outline:none;transition:border-color .2s;
+}
+.hex-input:focus{border-color:var(--accent);}
+.hex-input.error{border-color:var(--accent2);animation:shake .3s;}
+.apply-btn{
+  padding:.5rem 1.1rem;background:var(--accent);border:none;border-radius:8px;
+  font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:600;
+  color:#fff;cursor:pointer;transition:all .2s;white-space:nowrap;
+}
+.apply-btn:hover{background:#4a7bee;transform:translateY(-1px);}
+
+.token-explainer{
+  background:rgba(91,140,255,.06);border:1px solid rgba(91,140,255,.18);
+  border-radius:8px;padding:.85rem 1rem;font-size:.82rem;color:#8899cc;line-height:1.7;
+}
+.token-explainer strong{color:var(--accent);font-weight:500;}
+
+
+/* ══════════════════════════════════════════
+   GAME 2 — PROMPT ARCHITECT
+   Drop zone broken into 4 labeled slots
+══════════════════════════════════════════ */
+.architect-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;}
+
+/* Ingredient chips */
+.ingredient-bank{display:flex;flex-direction:column;gap:.5rem;}
+.bank-label{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.25rem;}
+.ing-chip{
+  padding:.6rem .9rem;border-radius:9px;cursor:grab;user-select:none;
+  font-size:.8rem;line-height:1.5;transition:all .2s;border:1px solid transparent;
+  position:relative;
+}
+.ing-chip:hover{transform:translateX(3px);}
+.ing-chip.used{opacity:.22;cursor:not-allowed;pointer-events:none;}
+.ing-chip:active{cursor:grabbing;}
+.ing-type-tag{font-family:'JetBrains Mono',monospace;font-size:.55rem;letter-spacing:.1em;opacity:.7;display:block;margin-bottom:.2rem;}
+.ic-context   {background:#0a1520;border-color:#1a3050;color:#7eb5ff;}
+.ic-goal      {background:#0a1a0e;border-color:#1a4028;color:#6ecf94;}
+.ic-constraint{background:#1a0e0a;border-color:#402820;color:#ff9966;}
+.ic-format    {background:#16120a;border-color:#3a2a06;color:#e8c44a;}
+
+/* 4-slot drop zone */
+.prompt-slots{display:flex;flex-direction:column;gap:.65rem;}
+.slot-label{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.5rem;}
+.prompt-slot{
+  border-radius:10px;padding:.65rem .9rem;min-height:58px;
+  border:2px dashed #1f2535;transition:all .25s;display:flex;align-items:center;
+  font-family:'JetBrains Mono',monospace;font-size:.74rem;gap:.6rem;position:relative;
+}
+.slot-placeholder{color:#2d364f;font-style:italic;font-size:.72rem;pointer-events:none;}
+.prompt-slot.drag-over{border-color:var(--accent);background:rgba(91,140,255,.06);}
+.prompt-slot.filled-context   {background:#0a1520;border:2px solid #1a3050;}
+.prompt-slot.filled-goal      {background:#0a1a0e;border:2px solid #1a4028;}
+.prompt-slot.filled-constraint{background:#1a0e0a;border:2px solid #402820;}
+.prompt-slot.filled-format    {background:#16120a;border:2px solid #3a2a06;}
+.slot-clear{
+  position:absolute;right:.65rem;top:50%;transform:translateY(-50%);
+  background:none;border:none;color:var(--muted);cursor:pointer;font-size:.8rem;
+  opacity:0;transition:opacity .2s;padding:.2rem;
+}
+.prompt-slot:hover .slot-clear{opacity:1;}
+.slot-filled-text{flex:1;line-height:1.5;}
+.slot-filled-tag{font-size:.58rem;opacity:.65;margin-bottom:.15rem;display:block;}
+
+/* Build btn + result */
+.build-prompt-btn{
+  width:100%;padding:.7rem;background:var(--accent);border:none;border-radius:9px;
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:600;
+  color:#fff;cursor:pointer;transition:all .2s;letter-spacing:.05em;margin-top:.75rem;
+}
+.build-prompt-btn:hover:not(:disabled){background:#4a7bee;transform:translateY(-1px);}
+.build-prompt-btn:disabled{background:#1a2030;color:var(--muted);cursor:not-allowed;}
+
+.prompt-result{
+  margin-top:1.25rem;display:none;
+  background:var(--code-bg);border:1px solid var(--border);border-radius:12px;overflow:hidden;
+}
+.prompt-result.show{display:block;animation:popIn .35s;}
+.result-tabs{display:flex;border-bottom:1px solid var(--border);}
+.result-tab{
+  padding:.55rem 1.1rem;font-family:'JetBrains Mono',monospace;font-size:.68rem;
+  color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;
+}
+.result-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.result-pane{padding:1.25rem;display:none;font-size:.82rem;}
+.result-pane.active{display:block;}
+/* assembled prompt */
+.assembled-text{line-height:1.9;color:var(--text);}
+.assembled-text .pt-ctx{color:#7eb5ff;}
+.assembled-text .pt-goal{color:#6ecf94;}
+.assembled-text .pt-con{color:#ff9966;}
+.assembled-text .pt-fmt{color:#e8c44a;}
+/* score panel */
+.score-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem;}
+.score-card{background:var(--surface2);border-radius:8px;padding:.75rem;text-align:center;}
+.score-num{font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:600;display:block;}
+.score-desc{font-size:.7rem;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-top:.2rem;}
+.score-bar-wrap{height:4px;background:#1a1f2c;border-radius:99px;overflow:hidden;margin:.4rem 0;}
+.score-bar-fill{height:100%;border-radius:99px;transition:width .6s cubic-bezier(.34,1.56,.64,1);}
+.feedback-item{margin-bottom:.5rem;padding:.5rem .75rem;border-radius:6px;font-size:.78rem;line-height:1.5;}
+.fb-good{background:rgba(78,205,196,.08);border:1px solid rgba(78,205,196,.2);color:var(--accent3);}
+.fb-warn{background:rgba(255,153,102,.08);border:1px solid rgba(255,153,102,.2);color:#ff9966;}
+.fb-miss{background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.2);color:var(--accent2);}
+.reset-prompt-btn{background:none;border:1px solid var(--border);border-radius:7px;padding:.4rem 1rem;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);cursor:pointer;transition:all .2s;margin-top:.75rem;}
+.reset-prompt-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+
+/* ══════════════════════════════════════════
+   GAME 3 — FIGMA MCP WALKTHROUGH
+   Step-by-step clickable pipeline
+══════════════════════════════════════════ */
+.mcp-pipeline{display:flex;flex-direction:column;gap:0;}
+.pipeline-step{
+  display:grid;grid-template-columns:48px 1fr;gap:1rem;
+  padding:1.25rem 0;border-left:2px solid var(--border);margin-left:24px;
+  padding-left:1.5rem;position:relative;transition:border-color .3s;cursor:pointer;
+}
+.pipeline-step::before{
+  content:'';position:absolute;left:-7px;top:1.4rem;
+  width:12px;height:12px;border-radius:50%;background:var(--surface2);
+  border:2px solid var(--border);transition:all .3s;
+}
+.pipeline-step.active::before{background:var(--accent);border-color:var(--accent);box-shadow:0 0 12px rgba(91,140,255,.4);}
+.pipeline-step.done::before{background:var(--accent3);border-color:var(--accent3);}
+.pipeline-step.active{border-color:var(--accent);}
+.pipeline-step.done{border-color:var(--accent3);}
+.step-num{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);padding-top:.15rem;}
+.step-content{flex:1;}
+.step-title{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:600;color:var(--text);margin-bottom:.3rem;display:flex;align-items:center;gap:.6rem;}
+.step-title .step-tag{font-size:.58rem;padding:.15rem .45rem;border-radius:4px;font-weight:400;letter-spacing:.07em;}
+.tag-figma{background:rgba(162,89,255,.15);color:#a259ff;}
+.tag-mcp{background:rgba(91,140,255,.15);color:var(--accent);}
+.tag-ai{background:rgba(78,205,196,.15);color:var(--accent3);}
+.tag-output{background:rgba(245,200,66,.15);color:var(--gold);}
+.step-desc{font-size:.85rem;color:#8899cc;line-height:1.65;margin-bottom:.6rem;}
+.step-panel{
+  display:none;background:var(--code-bg);border:1px solid var(--border);border-radius:10px;
+  overflow:hidden;margin-top:.65rem;animation:slideDown .3s;
+}
+.pipeline-step.active .step-panel,.pipeline-step.done .step-panel{display:block;}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.panel-bar{display:flex;align-items:center;justify-content:space-between;padding:.55rem .9rem;background:var(--surface2);border-bottom:1px solid var(--border);}
+.panel-bar-title{font-family:'JetBrains Mono',monospace;font-size:.63rem;color:var(--muted);}
+.panel-bar-action{
+  font-family:'JetBrains Mono',monospace;font-size:.63rem;padding:.3rem .75rem;
+  background:var(--accent);color:#fff;border:none;border-radius:5px;cursor:pointer;transition:all .2s;
+}
+.panel-bar-action:hover{background:#4a7bee;}
+.panel-bar-action.done-action{background:var(--accent3);color:#0a1a14;cursor:default;}
+.panel-code{padding:.85rem 1rem;font-family:'JetBrains Mono',monospace;font-size:.73rem;line-height:1.85;color:#4a5270;}
+.panel-chat{padding:.85rem 1rem;display:flex;flex-direction:column;gap:.6rem;}
+.chat-msg{padding:.6rem .85rem;border-radius:8px;font-size:.8rem;line-height:1.55;max-width:88%;}
+.chat-user{background:var(--surface2);border:1px solid var(--border);color:var(--text);align-self:flex-end;margin-left:auto;}
+.chat-ai{background:rgba(91,140,255,.08);border:1px solid rgba(91,140,255,.18);color:#8899cc;}
+.chat-label{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);letter-spacing:.08em;margin-bottom:.25rem;}
+.chat-typing{display:flex;gap:4px;align-items:center;padding:.5rem .85rem;}
+.chat-typing span{width:6px;height:6px;border-radius:50%;background:var(--accent);opacity:.4;animation:typingDot 1.2s infinite;}
+.chat-typing span:nth-child(2){animation-delay:.2s;}
+.chat-typing span:nth-child(3){animation-delay:.4s;}
+@keyframes typingDot{0%,80%,100%{opacity:.2;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
+.panel-output{padding:1rem;}
+.output-file{background:var(--surface2);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:.6rem;}
+.output-file-header{padding:.4rem .75rem;background:var(--surface2);border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);display:flex;align-items:center;gap:.5rem;}
+.output-file-code{padding:.75rem;font-family:'JetBrains Mono',monospace;font-size:.71rem;line-height:1.8;color:#4a5270;}
+.step-next-btn{
+  margin-top:.75rem;display:inline-block;padding:.45rem 1.1rem;background:transparent;
+  border:1px solid var(--border);border-radius:7px;font-family:'JetBrains Mono',monospace;
+  font-size:.68rem;color:var(--muted);cursor:pointer;transition:all .2s;
+}
+.step-next-btn:hover{border-color:var(--accent);color:var(--accent);}
+.step-next-btn.done-btn{border-color:var(--accent3);color:var(--accent3);}
+
+/* Syntax colours shared */
+.c-tag{color:var(--accent);} .c-attr{color:#d488cc;} .c-val{color:var(--accent3);}
+.c-comment{color:#2d364f;} .c-prop{color:#7eb5ff;} .c-css{color:#e8c44a;}
+.c-str{color:#ff9f7f;} .c-fn{color:#b8a4ff;}
+
+/* ── CLOSING ── */
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:5rem 0;}
+.closing{text-align:center;padding:4rem 0;}
+.closing h3{font-family:'DM Serif Display',serif;font-size:2rem;margin-bottom:1rem;}
+.closing p{color:var(--muted);max-width:500px;margin:0 auto;}
+
+/* ── REVEAL ── */
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s,transform .7s;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes popIn{0%{transform:scale(.94)}60%{transform:scale(1.03)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+@media(max-width:680px){
+  .studio-grid,.architect-grid{grid-template-columns:1fr;}
+  nav a:not(.logo){display:none;}
+  .score-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+<nav>
+  <span class="logo">// designer's edge</span>
+  <a onclick="document.getElementById('tokens').scrollIntoView({behavior:'smooth'})">01 Tokens</a>
+  <a onclick="document.getElementById('logic').scrollIntoView({behavior:'smooth'})">02 Logic</a>
+  <a onclick="document.getElementById('figma').scrollIntoView({behavior:'smooth'})">03 Figma MCP</a>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero" id="intro">
+  <div class="hero-label">UI Design × AI — A Field Guide</div>
+  <h1>The Designer's<br><em>Edge</em></h1>
+  <p class="lead">Design should feel human, as it's built to service humans. A machine cannot understand how a design <em>feels</em> when used — but it can do the heavy lifting so you can focus on exactly that.</p>
+  <div class="scroll-hint">scroll to play your way through</div>
+</section>
+
+<main class="content">
+
+  <p class="body-text reveal">It's easy to understand why the advent of AI might strike a chord with designers — it's a literal problem-solving machine. Despite this, a human hand in design will always be necessary. After studying design and exploring the potential of AI tools, I've come to understand there's a happy medium. Vibecoding an entire project produces something messy and ugly. Designing entirely by hand is beautiful but limited. The sweet spot is using AI for what it's good at.</p>
+  <p class="body-text reveal">This guide is hands-on. Each section is a mini-game that teaches you the concept by having you <strong>do it yourself</strong>. Let's say you're designing an online card game — you have the Figma prototype, but gameplay simulation can't be built in Figma. This is how you bridge that gap.</p>
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION 01 — COLOR TOKEN STUDIO
+  ═══════════════════════════════════════════════════ -->
+  <div id="tokens" class="section-header reveal">
+    <span class="section-num">// 01</span>
+    <h2>Styles → Tokens → CSS</h2>
+  </div>
+  <p class="body-text reveal">In Figma, your design decisions live as named styles. These are your <strong>design tokens</strong> — the single source of truth for your visual language. The first step bridging Figma and code is translating these tokens into CSS custom properties. When a style maps to a CSS variable, one change propagates everywhere.</p>
+  <p class="body-text reveal">The clock module on the right is a real UI component. Type any hex code into the CSS editor and watch the token update live — the clock's accent color, glow, and dot all respond instantly. This is exactly how token-driven theming works in production.</p>
+
+  <div class="game-label reveal"><span class="dot"></span> Toy — Color Token Studio</div>
+  <div class="game-shell reveal">
+    <div class="game-top-bar">
+      <span class="game-title">🎨 Color Token Studio — edit the CSS variable, watch the component update</span>
+      <span class="game-badge" id="token-badge">--color-primary: #5b8cff</span>
+    </div>
+    <div class="game-body">
+      <div class="studio-grid">
+
+        <!-- LEFT: Live Clock Preview -->
+        <div style="display:flex;flex-direction:column;gap:1rem;">
+          <div class="editor-label">Live Component Preview</div>
+          <div class="clock-module" id="clockModule">
+            <div class="clock-label">CLOCK MODULE</div>
+            <div class="clock-face" id="clockFace">
+              <svg class="clock-ticks" viewBox="0 0 140 140" style="position:absolute;inset:0;width:100%;height:100%;">
+                <g id="tick-group"></g>
+              </svg>
+              <div class="clock-time" id="clockTime">00:00:00</div>
+              <div class="clock-date" id="clockDate">SUN APR 12</div>
+            </div>
+            <div class="clock-dot" id="clockDot"></div>
+            <div class="clock-token-preview">
+              <span class="ctp-var">--color-primary</span>: <span class="ctp-val" id="ctpVal">#5b8cff</span>;
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:.5rem;">
+            <div class="editor-label">Quick Presets</div>
+            <div class="swatch-presets" id="swatchPresets">
+              <div class="preset-swatch active" style="background:#5b8cff" data-hex="#5b8cff" onclick="applyPreset(this)" title="Blue"></div>
+              <div class="preset-swatch" style="background:#ff6b6b" data-hex="#ff6b6b" onclick="applyPreset(this)" title="Red"></div>
+              <div class="preset-swatch" style="background:#4ecdc4" data-hex="#4ecdc4" onclick="applyPreset(this)" title="Teal"></div>
+              <div class="preset-swatch" style="background:#f5c842" data-hex="#f5c842" onclick="applyPreset(this)" title="Gold"></div>
+              <div class="preset-swatch" style="background:#b8a4ff" data-hex="#b8a4ff" onclick="applyPreset(this)" title="Lavender"></div>
+              <div class="preset-swatch" style="background:#ff9f7f" data-hex="#ff9f7f" onclick="applyPreset(this)" title="Peach"></div>
+              <div class="preset-swatch" style="background:#6ecf94" data-hex="#6ecf94" onclick="applyPreset(this)" title="Mint"></div>
+              <div class="preset-swatch" style="background:#ff6ec7" data-hex="#ff6ec7" onclick="applyPreset(this)" title="Pink"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: CSS Editor -->
+        <div class="css-editor-wrap">
+          <div class="editor-label">CSS Token Editor — type a hex value and press Apply</div>
+          <div class="css-editor">
+            <div class="editor-header">
+              <div class="editor-dot" style="background:#ff6b6b"></div>
+              <div class="editor-dot" style="background:#f5c842"></div>
+              <div class="editor-dot" style="background:#4ecdc4"></div>
+              <span class="editor-filename">tokens.css</span>
+            </div>
+            <div class="editor-lines">
+              <div class="line-nums">1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11</div>
+              <div class="editor-content"><span class="e-comment">/* ── Design Tokens ── */</span>
+<span class="e-sel">:root</span> {
+
+  <span class="e-comment">/* Edit this value ↓ */</span>
+  <span class="e-prop">--color-primary</span>: <span id="editorVal" class="e-val-static">#5b8cff</span>;
+
+  <span class="e-comment">/* Derived tokens */</span>
+  <span class="e-prop">--color-surface</span>:  <span class="e-val-static">#13161e</span>;
+  <span class="e-prop">--color-text</span>:     <span class="e-val-static">#e8eaf2</span>;
+
+}</div>
+            </div>
+          </div>
+
+          <div class="hex-input-row">
+            <div class="hex-preview-dot" id="hexPreviewDot" style="background:#5b8cff"></div>
+            <input class="hex-input" id="hexInput" type="text" value="#5b8cff" maxlength="7"
+              placeholder="#rrggbb"
+              oninput="onHexInput(this.value)"
+              onkeydown="if(event.key==='Enter')applyHex()">
+            <button class="apply-btn" onclick="applyHex()">Apply →</button>
+          </div>
+
+          <div class="token-explainer">
+            <strong>How this works in production:</strong> Your Figma styles get exported as a <code style="font-family:monospace;background:rgba(0,0,0,.3);padding:0 .3em;border-radius:3px">tokens.css</code> file using a plugin like <em>Tokens Studio</em>. Every component in your codebase references <code style="font-family:monospace;background:rgba(0,0,0,.3);padding:0 .3em;border-radius:3px">var(--color-primary)</code> — so a brand color update is a one-line change, not a find-and-replace across 40 files.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION 02 — PROMPT ARCHITECT
+  ═══════════════════════════════════════════════════ -->
+  <div id="logic" class="section-header reveal">
+    <span class="section-num">// 02</span>
+    <h2>Creating Logic with AI</h2>
+  </div>
+  <p class="body-text reveal">This is where AI earns its place. You've designed a card game — beautiful layouts, polished animations — but game logic is the hard part: shuffling, dealing, scoring, state. Rather than figuring out algorithms yourself, you <strong>describe the behavior you want</strong> and let AI write the implementation.</p>
+  <p class="body-text reveal">The key is writing a good prompt. A great code prompt has four ingredients: <strong style="color:#7eb5ff">Context</strong> (your stack and situation), <strong style="color:#6ecf94">Goal</strong> (what to build), <strong style="color:#ff9966">Constraint</strong> (guardrails), and <strong style="color:#e8c44a">Format</strong> (how the output should look). Drag the pieces below into their correct slots — then build and score your prompt.</p>
+
+  <div class="game-label reveal"><span class="dot"></span> Mini-Game — Prompt Architect</div>
+  <div class="game-shell reveal">
+    <div class="game-top-bar">
+      <span class="game-title">🤖 Prompt Architect — drag ingredients into their slots, then build</span>
+      <span class="game-badge" id="prompt-fill-count">0 / 4 slots filled</span>
+    </div>
+    <div class="game-body">
+      <div class="architect-grid">
+
+        <!-- LEFT: Ingredient Bank -->
+        <div>
+          <div class="bank-label">Ingredients — drag into slots →</div>
+          <div class="ingredient-bank" id="ingredient-bank">
+
+            <div class="ing-chip ic-context" draggable="true" data-type="context"
+              data-text="I'm building a browser card game in vanilla JS. The deck is an array of {suit, rank, value} objects."
+              ondragstart="ingDragStart(event)">
+              <span class="ing-type-tag">CONTEXT</span>
+              I'm building a browser card game in vanilla JS. Deck = array of {suit, rank, value} objects.
+            </div>
+
+            <div class="ing-chip ic-goal" draggable="true" data-type="goal"
+              data-text="Write a Fisher-Yates shuffle function and a deal(n) function that removes N cards from the top of the deck."
+              ondragstart="ingDragStart(event)">
+              <span class="ing-type-tag">GOAL</span>
+              Write a Fisher-Yates shuffle and a deal(n) that removes N cards from the top of the deck.
+            </div>
+
+            <div class="ing-chip ic-constraint" draggable="true" data-type="constraint"
+              data-text="No frameworks. Pure ES6+. Mutate the deck array in place. Use Math.trunc, not Math.floor."
+              ondragstart="ingDragStart(event)">
+              <span class="ing-type-tag">CONSTRAINT</span>
+              No frameworks. Pure ES6+. Mutate deck in place. Use Math.trunc, not Math.floor.
+            </div>
+
+            <div class="ing-chip ic-format" draggable="true" data-type="format"
+              data-text="Return just the two functions with JSDoc comments. No explanation or prose outside the code block."
+              ondragstart="ingDragStart(event)">
+              <span class="ing-type-tag">FORMAT</span>
+              Just the two functions with JSDoc. No prose or explanation outside the code block.
+            </div>
+
+          </div>
+        </div>
+
+        <!-- RIGHT: 4 Labeled Slots + Build -->
+        <div>
+          <div class="slot-label">Your Prompt — drop each ingredient into its slot</div>
+          <div class="prompt-slots">
+
+            <div class="prompt-slot" id="slot-context"
+              ondragover="slotDragOver(event,'context')" ondrop="slotDrop(event,'context')" ondragleave="slotDragLeave(event)">
+              <span class="slot-placeholder" id="sp-context">📍 Drop CONTEXT here — what are you building?</span>
+              <button class="slot-clear" onclick="clearSlot('context')">✕</button>
+            </div>
+
+            <div class="prompt-slot" id="slot-goal"
+              ondragover="slotDragOver(event,'goal')" ondrop="slotDrop(event,'goal')" ondragleave="slotDragLeave(event)">
+              <span class="slot-placeholder" id="sp-goal">🎯 Drop GOAL here — what should the AI write?</span>
+              <button class="slot-clear" onclick="clearSlot('goal')">✕</button>
+            </div>
+
+            <div class="prompt-slot" id="slot-constraint"
+              ondragover="slotDragOver(event,'constraint')" ondrop="slotDrop(event,'constraint')" ondragleave="slotDragLeave(event)">
+              <span class="slot-placeholder" id="sp-constraint">🔒 Drop CONSTRAINT here — what rules must it follow?</span>
+              <button class="slot-clear" onclick="clearSlot('constraint')">✕</button>
+            </div>
+
+            <div class="prompt-slot" id="slot-format"
+              ondragover="slotDragOver(event,'format')" ondrop="slotDrop(event,'format')" ondragleave="slotDragLeave(event)">
+              <span class="slot-placeholder" id="sp-format">📄 Drop FORMAT here — how should the output look?</span>
+              <button class="slot-clear" onclick="clearSlot('format')">✕</button>
+            </div>
+          </div>
+
+          <button class="build-prompt-btn" id="build-btn" onclick="buildPrompt()" disabled>▶ Build &amp; Score Prompt</button>
+        </div>
+      </div>
+
+      <!-- Result panel (full width below) -->
+      <div class="prompt-result" id="prompt-result">
+        <div class="result-tabs">
+          <div class="result-tab active" onclick="switchResultTab('assembled')">Assembled Prompt</div>
+          <div class="result-tab" onclick="switchResultTab('score')">Score &amp; Analysis</div>
+        </div>
+        <div class="result-pane active" id="pane-assembled">
+          <div class="assembled-text" id="assembled-text"></div>
+        </div>
+        <div class="result-pane" id="pane-score">
+          <div class="score-grid" id="score-grid"></div>
+          <div id="feedback-list"></div>
+          <button class="reset-prompt-btn" onclick="resetPrompt()">↺ Reset &amp; Try Again</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ═══════════════════════════════════════════════════
+       SECTION 03 — FIGMA MCP WALKTHROUGH
+  ═══════════════════════════════════════════════════ -->
+  <div id="figma" class="section-header reveal">
+    <span class="section-num">// 03</span>
+    <h2>Figma → Code via MCP</h2>
+  </div>
+  <p class="body-text reveal">Traditionally, turning a Figma design into code meant manually inspecting layer properties, copying values, and writing HTML by hand. Figma's <strong>MCP (Model Context Protocol) server</strong> changes this entirely — it lets an AI agent read your Figma file directly, inspect every layer, token, and component, and generate production-ready code without you copying a single value.</p>
+  <p class="body-text reveal">Walk through the pipeline below step by step. Each step is clickable — see the exact commands, AI conversations, and outputs at each stage of turning your card game Figma file into a running app.</p>
+
+  <div class="game-label reveal"><span class="dot"></span> Walkthrough — Figma MCP Pipeline</div>
+  <div class="game-shell reveal">
+    <div class="game-top-bar">
+      <span class="game-title">🔁 Figma MCP Pipeline — click each step to walk through the process</span>
+      <span class="game-badge" id="mcp-step-badge">Step 0 / 5</span>
+    </div>
+    <div class="game-body">
+      <div class="mcp-pipeline" id="mcp-pipeline">
+
+        <!-- STEP 1 -->
+        <div class="pipeline-step" id="step-1" onclick="activateStep(1)">
+          <div class="step-num">01</div>
+          <div class="step-content">
+            <div class="step-title">Install the Figma MCP Server <span class="step-tag tag-mcp">MCP</span></div>
+            <div class="step-desc">The Figma MCP server is a local bridge between your AI agent and the Figma API. Install it once and it runs as a background service your AI can talk to.</div>
+            <div class="step-panel" id="panel-1">
+              <div class="panel-bar">
+                <span class="panel-bar-title">terminal</span>
+                <button class="panel-bar-action" id="action-1" onclick="event.stopPropagation();stepAction(1)">Run Setup</button>
+              </div>
+              <div class="panel-code">
+<span class="c-comment"># Install the Figma MCP server globally</span>
+<span class="c-fn">npm</span> install -g @figma/mcp-server
+
+<span class="c-comment"># Add your Figma access token</span>
+<span class="c-fn">figma-mcp</span> config --token YOUR_FIGMA_TOKEN
+
+<span class="c-comment"># Start the server (runs on localhost:3845)</span>
+<span class="c-fn">figma-mcp</span> start
+
+<span class="c-comment"># ✓ Figma MCP server running on port 3845</span>
+<span class="c-comment"># ✓ Connected to Figma API as: your@email.com</span>
+              </div>
+              <div style="padding:.75rem 1rem 1rem">
+                <button class="step-next-btn" onclick="event.stopPropagation();completeStep(1)">Mark done &amp; continue →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2 -->
+        <div class="pipeline-step" id="step-2" onclick="activateStep(2)">
+          <div class="step-num">02</div>
+          <div class="step-content">
+            <div class="step-title">Connect AI Agent to MCP <span class="step-tag tag-ai">AI Agent</span></div>
+            <div class="step-desc">Point your AI agent (Claude, Cursor, Windsurf, etc.) at the MCP server. The agent can now call Figma tools: read files, inspect components, extract tokens.</div>
+            <div class="step-panel" id="panel-2">
+              <div class="panel-bar">
+                <span class="panel-bar-title">claude_desktop_config.json</span>
+                <button class="panel-bar-action" id="action-2" onclick="event.stopPropagation();stepAction(2)">Connect</button>
+              </div>
+              <div class="panel-code">
+{
+  <span class="c-prop">"mcpServers"</span>: {
+    <span class="c-prop">"figma"</span>: {
+      <span class="c-prop">"command"</span>: <span class="c-str">"figma-mcp"</span>,
+      <span class="c-prop">"args"</span>: [<span class="c-str">"serve"</span>],
+      <span class="c-prop">"env"</span>: {
+        <span class="c-prop">"FIGMA_TOKEN"</span>: <span class="c-str">"your-token-here"</span>
+      }
+    }
+  }
+}
+<span class="c-comment">
+// Claude now has access to tools:
+// • figma_get_file(fileId)
+// • figma_get_node(fileId, nodeId)
+// • figma_get_styles(fileId)
+// • figma_get_components(fileId)</span>
+              </div>
+              <div style="padding:.75rem 1rem 1rem">
+                <button class="step-next-btn" onclick="event.stopPropagation();completeStep(2)">Mark done &amp; continue →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div class="pipeline-step" id="step-3" onclick="activateStep(3)">
+          <div class="step-num">03</div>
+          <div class="step-content">
+            <div class="step-title">Extract Tokens &amp; Components <span class="step-tag tag-figma">Figma</span></div>
+            <div class="step-desc">Ask the AI to read your Figma file. It calls the MCP tools to pull design tokens (colors, type, spacing) and component structure directly — no copy-pasting from the inspector.</div>
+            <div class="step-panel" id="panel-3">
+              <div class="panel-bar"><span class="panel-bar-title">AI conversation</span><button class="panel-bar-action" id="action-3" onclick="event.stopPropagation();stepAction(3)">Simulate</button></div>
+              <div class="panel-chat" id="chat-3">
+                <div class="chat-msg chat-user">
+                  <div class="chat-label">YOU</div>
+                  Read my Figma file (key: aBcD1234) and extract all design tokens and the PlayingCard component structure.
+                </div>
+              </div>
+              <div style="padding:.75rem 1rem 1rem">
+                <button class="step-next-btn" onclick="event.stopPropagation();completeStep(3)">Mark done &amp; continue →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 4 -->
+        <div class="pipeline-step" id="step-4" onclick="activateStep(4)">
+          <div class="step-num">04</div>
+          <div class="step-content">
+            <div class="step-title">Generate Code from Design <span class="step-tag tag-ai">AI Agent</span></div>
+            <div class="step-desc">With the component structure in context, ask the AI to generate HTML, CSS, and JS. It uses the exact values from your Figma file — no approximations.</div>
+            <div class="step-panel" id="panel-4">
+              <div class="panel-bar"><span class="panel-bar-title">AI conversation</span><button class="panel-bar-action" id="action-4" onclick="event.stopPropagation();stepAction(4)">Generate</button></div>
+              <div class="panel-chat" id="chat-4">
+                <div class="chat-msg chat-user">
+                  <div class="chat-label">YOU</div>
+                  Now generate the PlayingCard component as a vanilla JS class with the exact tokens you just extracted. Include hover interaction and red/black variant support.
+                </div>
+              </div>
+              <div style="padding:.75rem 1rem 1rem">
+                <button class="step-next-btn" onclick="event.stopPropagation();completeStep(4)">Mark done &amp; continue →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 5 -->
+        <div class="pipeline-step" id="step-5" onclick="activateStep(5)">
+          <div class="step-num">05</div>
+          <div class="step-content">
+            <div class="step-title">Output — Production-Ready Files <span class="step-tag tag-output">Output</span></div>
+            <div class="step-desc">The AI produces three files that precisely mirror your Figma design: a token file, a component stylesheet, and a component JS class — ready to drop into your project.</div>
+            <div class="step-panel" id="panel-5">
+              <div class="panel-bar"><span class="panel-bar-title">Generated files</span><span style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--accent3)">✓ 3 files created</span></div>
+              <div class="panel-output">
+                <div class="output-file">
+                  <div class="output-file-header">📄 <span style="color:var(--text)">tokens.css</span></div>
+                  <div class="output-file-code"><span class="c-comment">/* Auto-generated from Figma file aBcD1234 */</span>
+<span class="c-prop">:root</span> {
+  <span class="c-prop">--color-card-red</span>:   <span class="c-css">#ff7070</span>;
+  <span class="c-prop">--color-card-black</span>: <span class="c-css">#aaaaee</span>;
+  <span class="c-prop">--color-bg-red</span>:     <span class="c-css">#3d1f1f</span>;
+  <span class="c-prop">--radius-card</span>:      <span class="c-css">8px</span>;
+  <span class="c-prop">--shadow-hover</span>:     <span class="c-css">0 18px 36px rgba(0,0,0,.5)</span>;
+}</div>
+                </div>
+                <div class="output-file">
+                  <div class="output-file-header">📄 <span style="color:var(--text)">PlayingCard.js</span></div>
+                  <div class="output-file-code"><span class="c-fn">class</span> <span class="c-tag">PlayingCard</span> {
+  <span class="c-fn">constructor</span>({ rank, suit, isRed }) {
+    <span class="c-prop">this</span>.el = document.<span class="c-fn">createElement</span>(<span class="c-str">'div'</span>);
+    <span class="c-prop">this</span>.el.className = <span class="c-str">`card ${isRed ? 'red' : 'black'}`</span>;
+    <span class="c-prop">this</span>.el.innerHTML = <span class="c-str">`
+      &lt;span class="rank"&gt;${rank}&lt;/span&gt;
+      &lt;span class="suit"&gt;${suit}&lt;/span&gt;
+    `</span>;
+  }
+  <span class="c-fn">mount</span>(parent) { parent.<span class="c-fn">appendChild</span>(<span class="c-prop">this</span>.el); }
+}</div>
+                </div>
+              </div>
+              <div style="padding:0 1rem 1rem">
+                <button class="step-next-btn done-btn" onclick="event.stopPropagation()">✓ Pipeline complete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /pipeline -->
+    </div>
+  </div>
+
+  <div class="divider reveal"></div>
+  <div class="closing reveal">
+    <h3>The Happy Medium</h3>
+    <p>AI handles the algorithms. You handle the <em>feeling</em>. Together, the result is something neither could make alone.</p>
+  </div>
+</main>
+
+<script>
+/* ── PROGRESS BAR ── */
+window.addEventListener('scroll', () => {
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  document.getElementById('progress').style.width = (window.scrollY / max * 100) + '%';
+});
+
+/* ── SCROLL REVEAL ── */
+const ro = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }), {threshold:.08});
+document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+
+
+/* ════════════════════════════════════════════
+   GAME 1 — COLOR TOKEN STUDIO
+════════════════════════════════════════════ */
+
+/* Draw tick marks on clock SVG */
+function buildClockFace() {
+  const g = document.getElementById('tick-group');
+  if (!g) return;
+  for (let i = 0; i < 60; i++) {
+    const angle = (i / 60) * 360;
+    const isMajor = i % 5 === 0;
+    const r = 66; // radius to outer edge
+    const len = isMajor ? 8 : 4;
+    const rad = (angle - 90) * Math.PI / 180;
+    const x1 = 70 + Math.cos(rad) * r;
+    const y1 = 70 + Math.sin(rad) * r;
+    const x2 = 70 + Math.cos(rad) * (r - len);
+    const y2 = 70 + Math.sin(rad) * (r - len);
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+    line.setAttribute('stroke', currentClockColor);
+    line.setAttribute('stroke-width', isMajor ? '1.5' : '0.8');
+    line.setAttribute('opacity', isMajor ? '0.6' : '0.25');
+    line.id = `tick-${i}`;
+    g.appendChild(line);
+  }
+}
+
+/* Live clock */
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const s = String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('clockTime').textContent = `${h}:${m}:${s}`;
+  const days = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  document.getElementById('clockDate').textContent = `${days[now.getDay()]} ${months[now.getMonth()]} ${now.getDate()}`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+let currentClockColor = '#5b8cff';
+
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return {r,g,b};
+}
+
+function applyColorToComponent(hex) {
+  const face = document.getElementById('clockFace');
+  const dot = document.getElementById('clockDot');
+  const time = document.getElementById('clockTime');
+  const ctpVal = document.getElementById('ctpVal');
+  const editorVal = document.getElementById('editorVal');
+  const badge = document.getElementById('token-badge');
+
+  currentClockColor = hex;
+
+  const {r,g,b} = hexToRgb(hex);
+  const shadow = `rgba(${r},${g},${b},0.25)`;
+  const glow = `rgba(${r},${g},${b},0.14)`;
+
+  face.style.borderColor = hex;
+  face.style.boxShadow = `0 0 30px ${shadow}`;
+  dot.style.background = hex;
+  dot.style.boxShadow = `0 0 8px ${hex}`;
+  time.style.color = hex;
+  document.getElementById('clockModule').style.setProperty('--clock-glow', glow);
+
+  ctpVal.textContent = hex;
+  ctpVal.style.color = hex;
+  editorVal.textContent = hex;
+  editorVal.style.color = hex;
+  badge.textContent = `--color-primary: ${hex}`;
+
+  // Update tick colors
+  document.querySelectorAll('#tick-group line').forEach(l => l.setAttribute('stroke', hex));
+
+  // Update hex preview dot
+  document.getElementById('hexPreviewDot').style.background = hex;
+}
+
+function isValidHex(val) {
+  return /^#[0-9A-Fa-f]{6}$/.test(val);
+}
+
+function onHexInput(val) {
+  const dot = document.getElementById('hexPreviewDot');
+  const input = document.getElementById('hexInput');
+  input.classList.remove('error');
+  // Auto-prepend # if missing
+  let v = val;
+  if (v && v[0] !== '#') v = '#' + v;
+  if (isValidHex(v)) {
+    dot.style.background = v;
+  }
+}
+
+function applyHex() {
+  let val = document.getElementById('hexInput').value.trim();
+  if (val && val[0] !== '#') val = '#' + val;
+  const input = document.getElementById('hexInput');
+  if (!isValidHex(val)) {
+    input.classList.add('error');
+    setTimeout(() => input.classList.remove('error'), 500);
+    return;
+  }
+  input.value = val;
+  applyColorToComponent(val);
+  // Deselect all presets
+  document.querySelectorAll('.preset-swatch').forEach(s => s.classList.remove('active'));
+  const match = document.querySelector(`.preset-swatch[data-hex="${val}"]`);
+  if (match) match.classList.add('active');
+}
+
+function applyPreset(el) {
+  const hex = el.dataset.hex;
+  document.getElementById('hexInput').value = hex;
+  document.querySelectorAll('.preset-swatch').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  applyColorToComponent(hex);
+}
+
+buildClockFace();
+
+
+/* ════════════════════════════════════════════
+   GAME 2 — PROMPT ARCHITECT
+════════════════════════════════════════════ */
+const slotState = { context: null, goal: null, constraint: null, format: null };
+let activeDragType = null;
+let activeDragText = null;
+let activeDragEl = null;
+
+const slotColors = {
+  context:    { bg:'#0a1520', border:'#1a3050', color:'#7eb5ff', cls:'filled-context' },
+  goal:       { bg:'#0a1a0e', border:'#1a4028', color:'#6ecf94', cls:'filled-goal' },
+  constraint: { bg:'#1a0e0a', border:'#402820', color:'#ff9966', cls:'filled-constraint' },
+  format:     { bg:'#16120a', border:'#3a2a06', color:'#e8c44a', cls:'filled-format' },
+};
+const slotLabels = { context:'CONTEXT', goal:'GOAL', constraint:'CONSTRAINT', format:'FORMAT' };
+
+function ingDragStart(e) {
+  activeDragType = e.currentTarget.dataset.type;
+  activeDragText = e.currentTarget.dataset.text;
+  activeDragEl = e.currentTarget;
+  e.dataTransfer.effectAllowed = 'move';
+}
+
+function slotDragOver(e, type) {
+  e.preventDefault();
+  document.getElementById('slot-' + type).classList.add('drag-over');
+}
+function slotDragLeave(e) {
+  e.currentTarget.classList.remove('drag-over');
+}
+function slotDrop(e, type) {
+  e.preventDefault();
+  const slot = document.getElementById('slot-' + type);
+  slot.classList.remove('drag-over');
+  if (!activeDragType || activeDragType !== type) {
+    // Wrong slot — shake
+    slot.style.animation = 'shake .3s';
+    setTimeout(() => slot.style.animation = '', 350);
+    return;
+  }
+  fillSlot(type, activeDragText, activeDragEl);
+}
+
+function fillSlot(type, text, chipEl) {
+  slotState[type] = text;
+  const slot = document.getElementById('slot-' + type);
+  const sc = slotColors[type];
+  slot.className = 'prompt-slot ' + sc.cls;
+  slot.innerHTML = `
+    <div class="slot-filled-text" style="color:${sc.color}">
+      <span class="slot-filled-tag" style="opacity:.6">${slotLabels[type]}</span>
+      ${text}
+    </div>
+    <button class="slot-clear" onclick="clearSlot('${type}')">✕</button>`;
+  if (chipEl) chipEl.classList.add('used');
+  updateFillCount();
+}
+
+function clearSlot(type) {
+  slotState[type] = null;
+  const slot = document.getElementById('slot-' + type);
+  slot.className = 'prompt-slot';
+  const placeholders = {
+    context: '📍 Drop CONTEXT here — what are you building?',
+    goal: '🎯 Drop GOAL here — what should the AI write?',
+    constraint: '🔒 Drop CONSTRAINT here — what rules must it follow?',
+    format: '📄 Drop FORMAT here — how should the output look?',
+  };
+  slot.innerHTML = `<span class="slot-placeholder" id="sp-${type}">${placeholders[type]}</span><button class="slot-clear" onclick="clearSlot('${type}')">✕</button>`;
+  // Re-enable chip
+  document.querySelectorAll('.ing-chip').forEach(c => {
+    if (c.dataset.type === type) c.classList.remove('used');
+  });
+  updateFillCount();
+  document.getElementById('prompt-result').classList.remove('show');
+}
+
+function updateFillCount() {
+  const filled = Object.values(slotState).filter(Boolean).length;
+  document.getElementById('prompt-fill-count').textContent = `${filled} / 4 slots filled`;
+  document.getElementById('build-btn').disabled = filled === 0;
+}
+
+function buildPrompt() {
+  const filled = Object.values(slotState).filter(Boolean).length;
+  const sc = slotColors;
+
+  // Assembled
+  let assembled = '';
+  ['context','goal','constraint','format'].forEach(k => {
+    if (slotState[k]) {
+      assembled += `<span style="color:${slotColors[k].color}">[${slotLabels[k]}] </span>${slotState[k]} `;
+    }
+  });
+  document.getElementById('assembled-text').innerHTML = `<div style="line-height:2">${assembled || '<span style="color:var(--muted)">No parts filled.</span>'}</div>`;
+
+  // Score
+  const scores = {
+    context:    slotState.context    ? { s:25, label:'Specificity', note:'Tells the AI your stack and domain.' } : { s:0,  label:'Specificity', note:'Missing — AI will assume a generic stack and may produce incorrect syntax.' },
+    goal:       slotState.goal       ? { s:35, label:'Clarity',     note:'Defines exactly what code to produce.' } : { s:0,  label:'Clarity',     note:'Missing — without a goal, output will be vague or exploratory.' },
+    constraint: slotState.constraint ? { s:25, label:'Precision',   note:'Prevents unwanted patterns and library choices.' } : { s:0,  label:'Precision',   note:'Missing — AI may use a framework, wrong idiom, or unnecessary abstraction.' },
+    format:     slotState.format     ? { s:15, label:'Usability',   note:'Controls output shape — saves cleanup time.' } : { s:0,  label:'Usability',   note:'Missing — you\'ll likely receive a wall of prose around the code.' },
+  };
+  const total = Object.values(scores).reduce((a,b) => a + b.s, 0);
+  const grade = total >= 90 ? '🚀 Excellent' : total >= 65 ? '✅ Good' : total >= 35 ? '🔶 Needs Work' : '⚠️ Weak';
+  const gradeColor = total >= 90 ? 'var(--accent3)' : total >= 65 ? 'var(--accent)' : total >= 35 ? '#ff9966' : 'var(--accent2)';
+
+  let scoreHtml = `
+    <div class="score-card" style="grid-column:1/-1">
+      <span class="score-num" style="color:${gradeColor}">${total}/100</span>
+      <div class="score-desc">${grade}</div>
+      <div class="score-bar-wrap" style="margin-top:.65rem"><div class="score-bar-fill" style="width:${total}%;background:${gradeColor}"></div></div>
+    </div>`;
+  ['context','goal','constraint','format'].forEach(k => {
+    const sc2 = slotColors[k];
+    const s = scores[k];
+    scoreHtml += `
+      <div class="score-card">
+        <span class="score-num" style="color:${sc2.color}">${s.s}/${k==='goal'?35:k==='context'||k==='constraint'?25:15}</span>
+        <div class="score-desc">${slotLabels[k]}: ${s.label}</div>
+      </div>`;
+  });
+  document.getElementById('score-grid').innerHTML = scoreHtml;
+
+  let fbHtml = '';
+  ['context','goal','constraint','format'].forEach(k => {
+    const s = scores[k];
+    const cls = s.s > 0 ? 'fb-good' : 'fb-miss';
+    const icon = s.s > 0 ? '✓' : '✗';
+    fbHtml += `<div class="feedback-item ${cls}">${icon} <strong>${slotLabels[k]}:</strong> ${s.note}</div>`;
+  });
+  document.getElementById('feedback-list').innerHTML = fbHtml;
+
+  document.getElementById('prompt-result').classList.add('show');
+  switchResultTab('assembled');
+  setTimeout(() => switchResultTab('score'), 800);
+}
+
+function switchResultTab(tab) {
+  document.querySelectorAll('.result-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.result-pane').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.result-tab[onclick*="${tab}"]`).classList.add('active');
+  document.getElementById('pane-' + tab).classList.add('active');
+}
+
+function resetPrompt() {
+  ['context','goal','constraint','format'].forEach(clearSlot);
+  document.getElementById('prompt-result').classList.remove('show');
+  updateFillCount();
+}
+
+
+/* ════════════════════════════════════════════
+   GAME 3 — FIGMA MCP PIPELINE
+════════════════════════════════════════════ */
+let currentStep = 0;
+
+function activateStep(n) {
+  if (currentStep >= n) return; // can't go back via click if already past
+  currentStep = n;
+  document.getElementById('mcp-step-badge').textContent = `Step ${n} / 5`;
+  const stepEl = document.getElementById('step-' + n);
+  stepEl.classList.add('active');
+  stepEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function stepAction(n) {
+  const btn = document.getElementById('action-' + n);
+  btn.textContent = '✓ Done';
+  btn.classList.add('done-action');
+}
+
+function completeStep(n) {
+  const stepEl = document.getElementById('step-' + n);
+  stepEl.classList.remove('active');
+  stepEl.classList.add('done');
+  if (n < 5) {
+    setTimeout(() => activateStep(n + 1), 200);
+  }
+}
+
+// Step 3: simulate AI chat
+function stepAction(n) {
+  const btn = document.getElementById('action-' + n);
+  btn.textContent = '✓ Done';
+  btn.classList.add('done-action');
+
+  if (n === 3) {
+    const chat = document.getElementById('chat-3');
+    // typing indicator
+    const typing = document.createElement('div');
+    typing.className = 'chat-ai';
+    typing.style.cssText = 'background:rgba(91,140,255,.06);border:1px solid rgba(91,140,255,.15)';
+    typing.innerHTML = `<div class="chat-label">CLAUDE (via Figma MCP)</div><div class="chat-typing"><span></span><span></span><span></span></div>`;
+    chat.appendChild(typing);
+    setTimeout(() => {
+      chat.removeChild(typing);
+      const resp = document.createElement('div');
+      resp.className = 'chat-msg chat-ai';
+      resp.innerHTML = `<div class="chat-label">CLAUDE (via Figma MCP)</div>
+        I've read your Figma file via MCP. Found:<br>
+        • <strong style="color:#7eb5ff">6 color tokens</strong> (Primary, Danger, Surface, BG, Border, Text)<br>
+        • <strong style="color:#7eb5ff">3 text styles</strong> (Heading/H1, Body/Default, Label/Mono)<br>
+        • <strong style="color:#7eb5ff">PlayingCard component</strong> — vertical Auto Layout, 80×120px, 2 variants (red/black), hover interaction<br>
+        • <strong style="color:#7eb5ff">CardRow frame</strong> — horizontal Auto Layout, gap:16, padding:24<br><br>
+        Ready to generate code. What would you like first?`;
+      chat.appendChild(resp);
+    }, 1800);
+  }
+
+  if (n === 4) {
+    const chat = document.getElementById('chat-4');
+    const typing = document.createElement('div');
+    typing.className = 'chat-msg chat-ai';
+    typing.innerHTML = `<div class="chat-label">CLAUDE (via Figma MCP)</div><div class="chat-typing"><span></span><span></span><span></span></div>`;
+    chat.appendChild(typing);
+    setTimeout(() => {
+      chat.removeChild(typing);
+      const resp = document.createElement('div');
+      resp.className = 'chat-msg chat-ai';
+      resp.innerHTML = `<div class="chat-label">CLAUDE (via Figma MCP)</div>
+        Generated <strong style="color:var(--accent3)">3 files</strong> from your Figma file (exact values, no approximations):<br><br>
+        <code style="font-family:monospace;background:rgba(0,0,0,.3);padding:.1em .4em;border-radius:3px;display:block;margin:.3rem 0">tokens.css</code>
+        <code style="font-family:monospace;background:rgba(0,0,0,.3);padding:.1em .4em;border-radius:3px;display:block;margin:.3rem 0">PlayingCard.css</code>
+        <code style="font-family:monospace;background:rgba(0,0,0,.3);padding:.1em .4em;border-radius:3px;display:block;margin:.3rem 0">PlayingCard.js</code>
+        <br>All tokens match your Figma styles exactly. Hover interaction maps to <code style="font-family:monospace;background:rgba(0,0,0,.3);padding:.1em .4em;border-radius:3px">.card:hover</code> translateY(-10px).`;
+      chat.appendChild(resp);
+    }, 2000);
+  }
+}
+
+// Init: open step 1
+setTimeout(() => activateStep(1), 600);
+</script>
+</body>
+</html>
