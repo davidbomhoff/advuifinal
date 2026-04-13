@@ -361,7 +361,7 @@ nav a:hover{color:var(--text);}
     <span class="section-num">// 01</span>
     <h2>Styles → Tokens → CSS</h2>
   </div>
-  <p class="body-text reveal">In Figma, your design decisions live as named styles. These are your <strong>design tokens</strong> — the single source of truth for your visual language. The first step bridging Figma and code is translating these tokens into CSS custom properties. When a style maps to a CSS variable, one change propagates everywhere.</p>
+  <p class="body-text reveal">First, let’s talk about converting Figma styles to css. This can be done by hand or using AI to create style “tokens”. These tokens are presets for css stylesheets and can be used throughout a file in liu of remembering specific colors, fonts, even spacings! The interactive activity below shows how a set of colors would look as css tokens.</p>
   <p class="body-text reveal">The clock module on the right is a real UI component. Type any hex code into the CSS editor and watch the token update live — the clock's accent color, glow, and dot all respond instantly. This is exactly how token-driven theming works in production.</p>
 
   <div class="game-label reveal"><span class="dot"></span> Toy — Color Token Studio</div>
@@ -457,7 +457,7 @@ nav a:hover{color:var(--text);}
     <span class="section-num">// 02</span>
     <h2>Creating Logic with AI</h2>
   </div>
-  <p class="body-text reveal">This is where AI earns its place. You've designed a card game — beautiful layouts, polished animations — but game logic is the hard part: shuffling, dealing, scoring, state. Rather than figuring out algorithms yourself, you <strong>describe the behavior you want</strong> and let AI write the implementation.</p>
+  <p class="body-text reveal">The next part is where AI is most useful for designers: coding complex mechanics. You know what you want in the prototype, but might not have the coding skills to quickly whip up a working script. The key is writing a good prompt. A great AI prompt for code has four ingredients: context (what you're building), goal (what you need), constraints (your stack), and format (how you want the output). The interactive activity below shows how a good prompt is built from knowledge on code problems.</p>
   <p class="body-text reveal">The key is writing a good prompt. A great code prompt has four ingredients: <strong style="color:#7eb5ff">Context</strong> (your stack and situation), <strong style="color:#6ecf94">Goal</strong> (what to build), <strong style="color:#ff9966">Constraint</strong> (guardrails), and <strong style="color:#e8c44a">Format</strong> (how the output should look). Drag the pieces below into their correct slots — then build and score your prompt.</p>
 
   <div class="game-label reveal"><span class="dot"></span> Mini-Game — Prompt Architect</div>
@@ -565,7 +565,7 @@ nav a:hover{color:var(--text);}
     <span class="section-num">// 03</span>
     <h2>Figma → Code via MCP</h2>
   </div>
-  <p class="body-text reveal">Traditionally, turning a Figma design into code meant manually inspecting layer properties, copying values, and writing HTML by hand. Figma's <strong>MCP (Model Context Protocol) server</strong> changes this entirely — it lets an AI agent read your Figma file directly, inspect every layer, token, and component, and generate production-ready code without you copying a single value.</p>
+  <p class="body-text reveal">Finally we got to the big one; Figma to code. Figma and html/css are more similar than one would think, they just speak different languages. The activity below shows how elements from a Figma file can be rewritten into code, with or without AI assistance. These tools will add another level to your prototypes, improve dev handoff, and help to realize the designer’s vision in a more complex manner.</p>
   <p class="body-text reveal">Walk through the pipeline below step by step. Each step is clickable — see the exact commands, AI conversations, and outputs at each stage of turning your card game Figma file into a running app.</p>
 
   <div class="game-label reveal"><span class="dot"></span> Walkthrough — Figma MCP Pipeline</div>
