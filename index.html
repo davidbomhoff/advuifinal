@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Building Better Mockups</title>
+<title>The Designer's Edge</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@300;400;600&family=Libre+Franklin:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -52,101 +52,179 @@ nav a:hover{color:var(--text);}
 .game-body{padding:1.5rem;}
 
 /* ══════════════════════════════════════════
-   GAME 1 — COLOR TOKEN STUDIO
-   Left: live clock module | Right: CSS editor
+   GAME 1 — TOKEN STUDIO
+   Left: token editor panel | Right: live card UI
 ══════════════════════════════════════════ */
-.studio-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start;}
+.studio-layout{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start;}
 
-/* Clock Module */
-.clock-module{
-  background:var(--code-bg);border:1px solid var(--border);border-radius:12px;
-  padding:2rem 1.5rem;display:flex;flex-direction:column;align-items:center;gap:1.25rem;
-  position:relative;overflow:hidden;transition:border-color .3s;
-}
-.clock-module::before{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse at 50% 0%,var(--clock-glow,rgba(91,140,255,.12)) 0%,transparent 70%);
-  pointer-events:none;transition:background .4s;
-}
-.clock-face{
-  width:140px;height:140px;border-radius:50%;
-  border:3px solid var(--clock-accent,#5b8cff);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.15rem;
-  position:relative;box-shadow:0 0 30px var(--clock-shadow,rgba(91,140,255,.2));
-  transition:border-color .4s,box-shadow .4s;
-}
-.clock-time{font-family:'JetBrains Mono',monospace;font-size:1.6rem;font-weight:600;color:var(--clock-accent,#5b8cff);letter-spacing:.05em;transition:color .4s;line-height:1;}
-.clock-date{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;}
-.clock-label{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
-.clock-ticks{position:absolute;inset:0;border-radius:50%;}
-.clock-dot{
-  width:8px;height:8px;border-radius:50%;
-  background:var(--clock-accent,#5b8cff);
-  box-shadow:0 0 8px var(--clock-accent,#5b8cff);
-  transition:background .4s,box-shadow .4s;
-}
-.clock-token-preview{
-  width:100%;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;
-  padding:.65rem .9rem;font-family:'JetBrains Mono',monospace;font-size:.68rem;line-height:1.7;
-}
-.ctp-var{color:var(--accent);}
-.ctp-val{color:var(--accent3);transition:color .3s;}
+/* ── Editor Panel (left) ── */
+.editor-panel{display:flex;flex-direction:column;gap:0;background:var(--code-bg);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.editor-chrome{display:flex;align-items:center;gap:.5rem;padding:.55rem .9rem;background:var(--surface2);border-bottom:1px solid var(--border);}
+.chrome-dot{width:10px;height:10px;border-radius:50%;}
+.chrome-filename{margin-left:.3rem;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);}
+.editor-scroll{overflow-y:auto;max-height:420px;}
+.token-rows{padding:.75rem 0;}
 
-/* Swatch Presets */
-.swatch-presets{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.25rem;}
-.preset-swatch{
-  width:28px;height:28px;border-radius:6px;cursor:pointer;border:2px solid transparent;
-  transition:all .2s;flex-shrink:0;
+/* Each editable token row */
+.token-row{
+  display:grid;grid-template-columns:1.6rem 1fr auto;align-items:center;gap:0;
+  padding:.18rem 0;cursor:pointer;transition:background .15s;position:relative;
 }
-.preset-swatch:hover{transform:scale(1.15);}
-.preset-swatch.active{border-color:white;transform:scale(1.1);}
+.token-row:hover{background:rgba(255,255,255,.03);}
+.token-row.active{background:rgba(91,140,255,.07);}
+.tr-linenum{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:#2d364f;text-align:right;padding-right:.6rem;user-select:none;}
+.tr-content{font-family:'JetBrains Mono',monospace;font-size:.75rem;line-height:1.85;white-space:pre;padding-right:.9rem;}
+.tr-edit-icon{width:1.5rem;text-align:center;font-size:.62rem;color:var(--muted);opacity:0;transition:opacity .15s;}
+.token-row:hover .tr-edit-icon{opacity:1;}
+.token-row.active .tr-edit-icon{opacity:1;color:var(--accent);}
 
-/* CSS Code Editor */
-.css-editor-wrap{display:flex;flex-direction:column;gap:.75rem;}
-.editor-label{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
-.css-editor{
-  background:var(--code-bg);border:1px solid var(--border);border-radius:10px;overflow:hidden;
-  font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.8;
-}
-.editor-header{
-  display:flex;align-items:center;gap:.5rem;padding:.5rem .9rem;
-  background:var(--surface2);border-bottom:1px solid var(--border);
-}
-.editor-dot{width:10px;height:10px;border-radius:50%;}
-.editor-filename{margin-left:.25rem;font-size:.62rem;color:var(--muted);letter-spacing:.05em;}
-.editor-lines{display:flex;}
-.line-nums{
-  padding:.75rem .6rem;background:rgba(0,0,0,.2);border-right:1px solid var(--border);
-  color:#2d364f;font-size:.72rem;line-height:1.8;text-align:right;user-select:none;min-width:2.2rem;
-}
-.editor-content{padding:.75rem .9rem;flex:1;min-height:180px;outline:none;white-space:pre;}
-.e-comment{color:#2d364f;}
-.e-sel{color:#d488cc;}
-.e-prop{color:var(--accent);}
-.e-val-static{color:var(--accent3);}
+/* Syntax inside rows */
+.ts-comment{color:#2d364f;}
+.ts-sel{color:#d488cc;}
+.ts-brace{color:#4a5270;}
+.ts-prop{color:#7eb5ff;}
+.ts-colon{color:#4a5270;}
+.ts-val{cursor:pointer;border-radius:3px;padding:0 .15em;transition:all .2s;}
+.ts-val:hover{background:rgba(255,255,255,.06);}
+.ts-val.color-val{font-weight:600;}
+.ts-semi{color:#4a5270;}
 
-/* Hex input row */
-.hex-input-row{display:flex;gap:.65rem;align-items:center;}
-.hex-preview-dot{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);flex-shrink:0;transition:background .2s;}
-.hex-input{
-  flex:1;background:var(--code-bg);border:1px solid var(--border);border-radius:8px;
-  padding:.5rem .85rem;font-family:'JetBrains Mono',monospace;font-size:.8rem;
+/* Inline edit popover */
+.token-popover{
+  position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:50;
+  background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+  padding:.9rem;box-shadow:0 8px 32px rgba(0,0,0,.4);display:none;
+}
+.token-popover.open{display:block;animation:popIn .2s;}
+.popover-label{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.55rem;}
+.popover-input-row{display:flex;gap:.5rem;align-items:center;}
+.popover-swatch{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);flex-shrink:0;transition:background .2s;}
+.popover-input{
+  flex:1;background:var(--code-bg);border:1px solid var(--border);border-radius:7px;
+  padding:.42rem .75rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;
   color:var(--accent3);outline:none;transition:border-color .2s;
 }
-.hex-input:focus{border-color:var(--accent);}
-.hex-input.error{border-color:var(--accent2);animation:shake .3s;}
-.apply-btn{
-  padding:.5rem 1.1rem;background:var(--accent);border:none;border-radius:8px;
-  font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:600;
+.popover-input:focus{border-color:var(--accent);}
+.popover-input.shake{animation:shake .3s;}
+.popover-apply{
+  padding:.42rem .9rem;background:var(--accent);border:none;border-radius:7px;
+  font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:600;
   color:#fff;cursor:pointer;transition:all .2s;white-space:nowrap;
 }
-.apply-btn:hover{background:#4a7bee;transform:translateY(-1px);}
+.popover-apply:hover{background:#4a7bee;}
+.color-swatches{display:flex;gap:.35rem;margin-top:.6rem;flex-wrap:wrap;}
+.cs-dot{width:22px;height:22px;border-radius:5px;cursor:pointer;border:2px solid transparent;transition:all .18s;flex-shrink:0;}
+.cs-dot:hover{transform:scale(1.2);}
+.cs-dot.active{border-color:white;transform:scale(1.1);}
+.popover-hint{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);margin-top:.55rem;}
 
-.token-explainer{
-  background:rgba(91,140,255,.06);border:1px solid rgba(91,140,255,.18);
-  border-radius:8px;padding:.85rem 1rem;font-size:.82rem;color:#8899cc;line-height:1.7;
+/* Range slider for non-color tokens */
+.popover-range{width:100%;accent-color:var(--accent);margin:.4rem 0;}
+.range-labels{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);}
+
+/* ── Live Preview Panel (right) ── */
+.preview-panel{display:flex;flex-direction:column;gap:.85rem;}
+.preview-label{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;}
+
+.card-ui{
+  background:var(--code-bg);border:1px solid var(--border);border-radius:12px;
+  padding:1.25rem;display:flex;flex-direction:column;gap:1rem;
+  transition:all .3s;position:relative;overflow:hidden;
 }
-.token-explainer strong{color:var(--accent);font-weight:500;}
+.card-ui::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% -20%,rgba(var(--preview-accent-rgb,91 140 255),.1) 0%,transparent 65%);
+  pointer-events:none;transition:background .4s;
+}
+
+/* UI Header bar */
+.cui-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.6rem .9rem;border-radius:var(--preview-radius,8px);
+  background:var(--preview-surface,#13161e);border:1px solid var(--preview-border,#252b3a);
+  transition:all .35s;
+}
+.cui-header-title{
+  font-family:'JetBrains Mono',monospace;font-weight:600;
+  font-size:var(--preview-font-size,0.85rem);
+  color:var(--preview-accent,#5b8cff);
+  transition:all .35s;
+}
+.cui-header-badge{
+  font-family:'JetBrains Mono',monospace;font-size:.6rem;
+  padding:.2rem .55rem;border-radius:99px;
+  background:rgba(var(--preview-accent-rgb,91 140 255),.15);
+  color:var(--preview-accent,#5b8cff);
+  transition:all .35s;
+}
+
+/* Card row */
+.cui-card-row{
+  display:flex;gap:var(--preview-spacing,12px);justify-content:center;flex-wrap:wrap;
+  padding:var(--preview-spacing,12px);
+  background:var(--preview-surface,#13161e);border-radius:var(--preview-radius,8px);
+  border:1px solid var(--preview-border,#252b3a);
+  transition:all .35s;
+}
+.cui-card{
+  width:58px;height:88px;border-radius:calc(var(--preview-radius,8px) - 2px);
+  display:flex;flex-direction:column;justify-content:space-between;
+  padding:.3rem .35rem;font-family:'JetBrains Mono',monospace;font-weight:600;
+  font-size:var(--preview-font-size,0.85rem);
+  cursor:pointer;user-select:none;
+  border:1px solid rgba(255,255,255,.08);
+  transition:all .35s,transform .2s,box-shadow .2s;flex-shrink:0;
+}
+.cui-card:hover{transform:translateY(-8px) rotate(-2deg);box-shadow:0 14px 28px rgba(0,0,0,.5);}
+.cui-card.red{background:linear-gradient(135deg,#2a1a1a,#3d1f1f);color:var(--preview-accent,#5b8cff);}
+.cui-card.black{background:linear-gradient(135deg,#1a1a2a,#1f1f3d);color:#aaaaee;}
+.cui-card-rank{font-size:calc(var(--preview-font-size,0.85rem) * 0.85);line-height:1;}
+.cui-card-suit{text-align:center;font-size:calc(var(--preview-font-size,0.85rem) * 1.3);}
+.cui-card-rank-bot{font-size:calc(var(--preview-font-size,0.85rem) * 0.85);transform:rotate(180deg);align-self:flex-end;line-height:1;}
+
+/* Stats row */
+.cui-stats{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--preview-spacing,12px);
+  transition:gap .35s;
+}
+.cui-stat{
+  background:var(--preview-surface,#13161e);border:1px solid var(--preview-border,#252b3a);
+  border-radius:var(--preview-radius,8px);padding:.55rem .7rem;text-align:center;
+  transition:all .35s;
+}
+.cui-stat-val{
+  font-family:'JetBrains Mono',monospace;font-weight:600;
+  font-size:var(--preview-font-size,0.85rem);
+  color:var(--preview-accent,#5b8cff);
+  display:block;transition:all .35s;
+}
+.cui-stat-label{font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--muted);letter-spacing:.08em;margin-top:.1rem;}
+
+/* Deal button */
+.cui-deal-btn{
+  width:100%;padding:.55rem;border:1px solid var(--preview-accent,#5b8cff);
+  background:rgba(var(--preview-accent-rgb,91 140 255),.1);
+  color:var(--preview-accent,#5b8cff);
+  border-radius:var(--preview-radius,8px);
+  font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:600;
+  cursor:pointer;transition:all .35s;letter-spacing:.05em;
+}
+.cui-deal-btn:hover{background:rgba(var(--preview-accent-rgb,91 140 255),.2);}
+
+/* Token change flash */
+.preview-flash{animation:tokenFlash .5s;}
+@keyframes tokenFlash{0%,100%{opacity:1}50%{opacity:.6}}
+
+/* Active token indicator strip */
+.active-token-strip{
+  display:flex;align-items:center;gap:.6rem;padding:.6rem .85rem;
+  background:rgba(91,140,255,.06);border:1px solid rgba(91,140,255,.18);border-radius:8px;
+  font-family:'JetBrains Mono',monospace;font-size:.7rem;
+}
+.ats-arrow{color:var(--muted);}
+.ats-token{color:var(--accent);}
+.ats-val{color:var(--accent3);}
+.ats-hint{color:var(--muted);margin-left:auto;font-size:.6rem;}
 
 
 /* ══════════════════════════════════════════
@@ -336,22 +414,22 @@ nav a:hover{color:var(--text);}
 <div id="progress"></div>
 <nav>
   <span class="logo">// designer's edge</span>
-  <a onclick="document.getElementById('tokens').scrollIntoView({behavior:'smooth'})">01 Tokens</a>
+  <a onclick="document.getElementById('tokens').scrollIntoView({behavior:'smooth'})">01 Variables</a>
   <a onclick="document.getElementById('logic').scrollIntoView({behavior:'smooth'})">02 Logic</a>
   <a onclick="document.getElementById('figma').scrollIntoView({behavior:'smooth'})">03 Figma MCP</a>
 </nav>
 
 <!-- ── HERO ── -->
 <section class="hero" id="intro">
-  <div class="hero-label">Figma to Code with AI</div>
-  <h1>Design<br><em>Bigger</em></h1>
-  <p class="lead">Design should feel human, as it’s built to service humans. It’s easy to understand why the advent of AI might strike a chord with designers; it’s a literal problem-solving machine. Despite this, a human hand in design will always be necessary, as a machine cannot understand how a design feels when used by a human.</p>
+  <div class="hero-label">UI Design × AI — A Field Guide</div>
+  <h1>The Designer's<br><em>Edge</em></h1>
+  <p class="lead">Design should feel human, as it's built to service humans. A machine cannot understand how a design <em>feels</em> when used — but it can do the heavy lifting so you can focus on exactly that.</p>
   <div class="scroll-hint">scroll to play your way through</div>
 </section>
 
 <main class="content">
 
-  <p class="body-text reveal">After studying design and exploring the potential of AI tools, I’ve come to understand that there is a happy medium for designers when it comes to using AI. While it’s easy to just vibecode an entire project; process to prototype, the product will turn out messy and ugly. When designed by hand, you’ll get a great product; but maybe not reaching the full potential of what it could be. This tool looks to help UI designers understand how they can use the power of AI to turn a Figma prototype into an interactive app. Let’s say, for example, you’re designing an online card game. You have the vector files, stylesheets, and a pretty good Figma prototype, but simulation of gameplay is a function that cannot be built out in Figma, so the real user experience isn’t quite replicated. This is where I teach you how to upgrade your existing prototype to something that closer represents the MVP. All this will take is some basic knowledge of html, css, and js.</p>
+  <p class="body-text reveal">It's easy to understand why the advent of AI might strike a chord with designers — it's a literal problem-solving machine. Despite this, a human hand in design will always be necessary. After studying design and exploring the potential of AI tools, I've come to understand there's a happy medium. Vibecoding an entire project produces something messy and ugly. Designing entirely by hand is beautiful but limited. The sweet spot is using AI for what it's good at.</p>
   <p class="body-text reveal">This guide is hands-on. Each section is a mini-game that teaches you the concept by having you <strong>do it yourself</strong>. Let's say you're designing an online card game — you have the Figma prototype, but gameplay simulation can't be built in Figma. This is how you bridge that gap.</p>
 
   <!-- ═══════════════════════════════════════════════════
@@ -359,92 +437,66 @@ nav a:hover{color:var(--text);}
   ═══════════════════════════════════════════════════ -->
   <div id="tokens" class="section-header reveal">
     <span class="section-num">// 01</span>
-    <h2>Styles → Tokens → CSS</h2>
+    <h2>Styles → Variables → CSS</h2>
   </div>
-  <p class="body-text reveal">First, let’s talk about converting Figma styles to css. This can be done by hand or using AI to create style “tokens”. These tokens are presets for css stylesheets and can be used throughout a file in liu of remembering specific colors, fonts, even spacings! The interactive activity below shows how a set of colors would look as css tokens.</p>
-  <p class="body-text reveal">The clock module on the right is a real UI component. Type any hex code into the CSS editor and watch the token update live — the clock's accent color, glow, and dot all respond instantly. This is exactly how token-driven theming works in production.</p>
+  <p class="body-text reveal">In Figma, your design decisions live as named styles. These are your <strong>design variables</strong> — the single source of truth for your visual language. The first step bridging Figma and code is translating these variables into CSS custom properties. When a style maps to a CSS variable, one change propagates everywhere — colors, spacing, font sizes, border radii, all of it.</p>
+  <p class="body-text reveal">The card game UI on the right is built entirely from design variables. Click any value in the CSS file to open its editor — change a color, drag a slider, and watch every element that references that variable update simultaneously. This is exactly how variable-driven design systems work in production.</p>
 
-  <div class="game-label reveal"><span class="dot"></span> Toy — Color Token Studio</div>
+  <div class="game-label reveal"><span class="dot"></span> Toy — Variable Studio</div>
   <div class="game-shell reveal">
     <div class="game-top-bar">
-      <span class="game-title">🎨 Color Token Studio — edit the CSS variable, watch the component update</span>
-      <span class="game-badge" id="token-badge">--color-primary: #5b8cff</span>
+      <span class="game-title">🎨 Variable Studio — click any value in the CSS file to edit it</span>
+      <span class="game-badge" id="active-token-badge">select a token to edit</span>
     </div>
     <div class="game-body">
-      <div class="studio-grid">
+      <div class="studio-layout">
 
-        <!-- LEFT: Live Clock Preview -->
-        <div style="display:flex;flex-direction:column;gap:1rem;">
-          <div class="editor-label">Live Component Preview</div>
-          <div class="clock-module" id="clockModule">
-            <div class="clock-label">CLOCK MODULE</div>
-            <div class="clock-face" id="clockFace">
-              <svg class="clock-ticks" viewBox="0 0 140 140" style="position:absolute;inset:0;width:100%;height:100%;">
-                <g id="tick-group"></g>
-              </svg>
-              <div class="clock-time" id="clockTime">00:00:00</div>
-              <div class="clock-date" id="clockDate">SUN APR 12</div>
-            </div>
-            <div class="clock-dot" id="clockDot"></div>
-            <div class="clock-token-preview">
-              <span class="ctp-var">--color-primary</span>: <span class="ctp-val" id="ctpVal">#5b8cff</span>;
-            </div>
+        <!-- LEFT: Variable Editor (fake CSS file) -->
+        <div class="editor-panel">
+          <div class="editor-chrome">
+            <div class="chrome-dot" style="background:#ff6b6b"></div>
+            <div class="chrome-dot" style="background:#f5c842"></div>
+            <div class="chrome-dot" style="background:#4ecdc4"></div>
+            <span class="chrome-filename">tokens.css</span>
           </div>
-
-          <div style="display:flex;flex-direction:column;gap:.5rem;">
-            <div class="editor-label">Quick Presets</div>
-            <div class="swatch-presets" id="swatchPresets">
-              <div class="preset-swatch active" style="background:#5b8cff" data-hex="#5b8cff" onclick="applyPreset(this)" title="Blue"></div>
-              <div class="preset-swatch" style="background:#ff6b6b" data-hex="#ff6b6b" onclick="applyPreset(this)" title="Red"></div>
-              <div class="preset-swatch" style="background:#4ecdc4" data-hex="#4ecdc4" onclick="applyPreset(this)" title="Teal"></div>
-              <div class="preset-swatch" style="background:#f5c842" data-hex="#f5c842" onclick="applyPreset(this)" title="Gold"></div>
-              <div class="preset-swatch" style="background:#b8a4ff" data-hex="#b8a4ff" onclick="applyPreset(this)" title="Lavender"></div>
-              <div class="preset-swatch" style="background:#ff9f7f" data-hex="#ff9f7f" onclick="applyPreset(this)" title="Peach"></div>
-              <div class="preset-swatch" style="background:#6ecf94" data-hex="#6ecf94" onclick="applyPreset(this)" title="Mint"></div>
-              <div class="preset-swatch" style="background:#ff6ec7" data-hex="#ff6ec7" onclick="applyPreset(this)" title="Pink"></div>
+          <div class="editor-scroll">
+            <div class="token-rows" id="tokenRows">
+              <!-- rows injected by JS -->
             </div>
           </div>
         </div>
 
-        <!-- RIGHT: CSS Editor -->
-        <div class="css-editor-wrap">
-          <div class="editor-label">CSS Token Editor — type a hex value and press Apply</div>
-          <div class="css-editor">
-            <div class="editor-header">
-              <div class="editor-dot" style="background:#ff6b6b"></div>
-              <div class="editor-dot" style="background:#f5c842"></div>
-              <div class="editor-dot" style="background:#4ecdc4"></div>
-              <span class="editor-filename">tokens.css</span>
+        <!-- RIGHT: Live Card UI Preview -->
+        <div class="preview-panel">
+          <div class="preview-label">Live Preview — updates as you edit</div>
+
+          <div class="card-ui" id="cardUI">
+            <!-- header -->
+            <div class="cui-header">
+              <span class="cui-header-title">Card Game</span>
+              <span class="cui-header-badge">5 cards dealt</span>
             </div>
-            <div class="editor-lines">
-              <div class="line-nums">1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>10<br>11</div>
-              <div class="editor-content"><span class="e-comment">/* ── Design Tokens ── */</span>
-<span class="e-sel">:root</span> {
-
-  <span class="e-comment">/* Edit this value ↓ */</span>
-  <span class="e-prop">--color-primary</span>: <span id="editorVal" class="e-val-static">#5b8cff</span>;
-
-  <span class="e-comment">/* Derived tokens */</span>
-  <span class="e-prop">--color-surface</span>:  <span class="e-val-static">#13161e</span>;
-  <span class="e-prop">--color-text</span>:     <span class="e-val-static">#e8eaf2</span>;
-
-}</div>
+            <!-- card row -->
+            <div class="cui-card-row" id="cuiCardRow"></div>
+            <!-- stats -->
+            <div class="cui-stats">
+              <div class="cui-stat"><span class="cui-stat-val">21</span><div class="cui-stat-label">HAND VALUE</div></div>
+              <div class="cui-stat"><span class="cui-stat-val">47</span><div class="cui-stat-label">DECK LEFT</div></div>
+              <div class="cui-stat"><span class="cui-stat-val">3</span><div class="cui-stat-label">ROUND</div></div>
             </div>
+            <!-- button -->
+            <button class="cui-deal-btn" onclick="dealPreviewCards()">⟳ Deal New Hand</button>
           </div>
 
-          <div class="hex-input-row">
-            <div class="hex-preview-dot" id="hexPreviewDot" style="background:#5b8cff"></div>
-            <input class="hex-input" id="hexInput" type="text" value="#5b8cff" maxlength="7"
-              placeholder="#rrggbb"
-              oninput="onHexInput(this.value)"
-              onkeydown="if(event.key==='Enter')applyHex()">
-            <button class="apply-btn" onclick="applyHex()">Apply →</button>
-          </div>
-
-          <div class="token-explainer">
-            <strong>How this works in production:</strong> Your Figma styles get exported as a <code style="font-family:monospace;background:rgba(0,0,0,.3);padding:0 .3em;border-radius:3px">tokens.css</code> file using a plugin like <em>Tokens Studio</em>. Every component in your codebase references <code style="font-family:monospace;background:rgba(0,0,0,.3);padding:0 .3em;border-radius:3px">var(--color-primary)</code> — so a brand color update is a one-line change, not a find-and-replace across 40 files.
+          <!-- Active token indicator -->
+          <div class="active-token-strip" id="activeStrip" style="display:none">
+            <span class="ats-token" id="ats-token">--color-accent</span>
+            <span class="ats-arrow">→</span>
+            <span class="ats-val" id="ats-val">#5b8cff</span>
+            <span class="ats-hint">editing ↑</span>
           </div>
         </div>
+
       </div>
     </div>
   </div>
@@ -457,7 +509,7 @@ nav a:hover{color:var(--text);}
     <span class="section-num">// 02</span>
     <h2>Creating Logic with AI</h2>
   </div>
-  <p class="body-text reveal">The next part is where AI is most useful for designers: coding complex mechanics. You know what you want in the prototype, but might not have the coding skills to quickly whip up a working script. The key is writing a good prompt. A great AI prompt for code has four ingredients: context (what you're building), goal (what you need), constraints (your stack), and format (how you want the output). The interactive activity below shows how a good prompt is built from knowledge on code problems.</p>
+  <p class="body-text reveal">This is where AI earns its place. You've designed a card game — beautiful layouts, polished animations — but game logic is the hard part: shuffling, dealing, scoring, state. Rather than figuring out algorithms yourself, you <strong>describe the behavior you want</strong> and let AI write the implementation.</p>
   <p class="body-text reveal">The key is writing a good prompt. A great code prompt has four ingredients: <strong style="color:#7eb5ff">Context</strong> (your stack and situation), <strong style="color:#6ecf94">Goal</strong> (what to build), <strong style="color:#ff9966">Constraint</strong> (guardrails), and <strong style="color:#e8c44a">Format</strong> (how the output should look). Drag the pieces below into their correct slots — then build and score your prompt.</p>
 
   <div class="game-label reveal"><span class="dot"></span> Mini-Game — Prompt Architect</div>
@@ -565,7 +617,7 @@ nav a:hover{color:var(--text);}
     <span class="section-num">// 03</span>
     <h2>Figma → Code via MCP</h2>
   </div>
-  <p class="body-text reveal">Finally we got to the big one; Figma to code. Figma and html/css are more similar than one would think, they just speak different languages. The activity below shows how elements from a Figma file can be rewritten into code, with or without AI assistance. These tools will add another level to your prototypes, improve dev handoff, and help to realize the designer’s vision in a more complex manner.</p>
+  <p class="body-text reveal">Traditionally, turning a Figma design into code meant manually inspecting layer properties, copying values, and writing HTML by hand. Figma's <strong>MCP (Model Context Protocol) server</strong> changes this entirely — it lets an AI agent read your Figma file directly, inspect every layer, variable, and component, and generate production-ready code without you copying a single value.</p>
   <p class="body-text reveal">Walk through the pipeline below step by step. Each step is clickable — see the exact commands, AI conversations, and outputs at each stage of turning your card game Figma file into a running app.</p>
 
   <div class="game-label reveal"><span class="dot"></span> Walkthrough — Figma MCP Pipeline</div>
@@ -613,7 +665,7 @@ nav a:hover{color:var(--text);}
           <div class="step-num">02</div>
           <div class="step-content">
             <div class="step-title">Connect AI Agent to MCP <span class="step-tag tag-ai">AI Agent</span></div>
-            <div class="step-desc">Point your AI agent (Claude, Cursor, Windsurf, etc.) at the MCP server. The agent can now call Figma tools: read files, inspect components, extract tokens.</div>
+            <div class="step-desc">Point your AI agent (Claude, Cursor, Windsurf, etc.) at the MCP server. The agent can now call Figma tools: read files, inspect components, extract variables.</div>
             <div class="step-panel" id="panel-2">
               <div class="panel-bar">
                 <span class="panel-bar-title">claude_desktop_config.json</span>
@@ -649,14 +701,14 @@ nav a:hover{color:var(--text);}
         <div class="pipeline-step" id="step-3" onclick="activateStep(3)">
           <div class="step-num">03</div>
           <div class="step-content">
-            <div class="step-title">Extract Tokens &amp; Components <span class="step-tag tag-figma">Figma</span></div>
-            <div class="step-desc">Ask the AI to read your Figma file. It calls the MCP tools to pull design tokens (colors, type, spacing) and component structure directly — no copy-pasting from the inspector.</div>
+            <div class="step-title">Extract Variables &amp; Components <span class="step-tag tag-figma">Figma</span></div>
+            <div class="step-desc">Ask the AI to read your Figma file. It calls the MCP tools to pull design variables (colors, type, spacing) and component structure directly — no copy-pasting from the inspector.</div>
             <div class="step-panel" id="panel-3">
               <div class="panel-bar"><span class="panel-bar-title">AI conversation</span><button class="panel-bar-action" id="action-3" onclick="event.stopPropagation();stepAction(3)">Simulate</button></div>
               <div class="panel-chat" id="chat-3">
                 <div class="chat-msg chat-user">
                   <div class="chat-label">YOU</div>
-                  Read my Figma file (key: aBcD1234) and extract all design tokens and the PlayingCard component structure.
+                  Read my Figma file (key: aBcD1234) and extract all design variables and the PlayingCard component structure.
                 </div>
               </div>
               <div style="padding:.75rem 1rem 1rem">
@@ -677,7 +729,7 @@ nav a:hover{color:var(--text);}
               <div class="panel-chat" id="chat-4">
                 <div class="chat-msg chat-user">
                   <div class="chat-label">YOU</div>
-                  Now generate the PlayingCard component as a vanilla JS class with the exact tokens you just extracted. Include hover interaction and red/black variant support.
+                  Now generate the PlayingCard component as a vanilla JS class with the exact variables you just extracted. Include hover interaction and red/black variant support.
                 </div>
               </div>
               <div style="padding:.75rem 1rem 1rem">
@@ -692,7 +744,7 @@ nav a:hover{color:var(--text);}
           <div class="step-num">05</div>
           <div class="step-content">
             <div class="step-title">Output — Production-Ready Files <span class="step-tag tag-output">Output</span></div>
-            <div class="step-desc">The AI produces three files that precisely mirror your Figma design: a token file, a component stylesheet, and a component JS class — ready to drop into your project.</div>
+            <div class="step-desc">The AI produces three files that precisely mirror your Figma design: a variables file, a component stylesheet, and a component JS class — ready to drop into your project.</div>
             <div class="step-panel" id="panel-5">
               <div class="panel-bar"><span class="panel-bar-title">Generated files</span><span style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--accent3)">✓ 3 files created</span></div>
               <div class="panel-output">
@@ -753,133 +805,265 @@ document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
 
 
 /* ════════════════════════════════════════════
-   GAME 1 — COLOR TOKEN STUDIO
+   GAME 1 — VARIABLE STUDIO (multi-variable)
 ════════════════════════════════════════════ */
 
-/* Draw tick marks on clock SVG */
-function buildClockFace() {
-  const g = document.getElementById('tick-group');
-  if (!g) return;
-  for (let i = 0; i < 60; i++) {
-    const angle = (i / 60) * 360;
-    const isMajor = i % 5 === 0;
-    const r = 66; // radius to outer edge
-    const len = isMajor ? 8 : 4;
-    const rad = (angle - 90) * Math.PI / 180;
-    const x1 = 70 + Math.cos(rad) * r;
-    const y1 = 70 + Math.sin(rad) * r;
-    const x2 = 70 + Math.cos(rad) * (r - len);
-    const y2 = 70 + Math.sin(rad) * (r - len);
-    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    line.setAttribute('x1', x1); line.setAttribute('y1', y1);
-    line.setAttribute('x2', x2); line.setAttribute('y2', y2);
-    line.setAttribute('stroke', currentClockColor);
-    line.setAttribute('stroke-width', isMajor ? '1.5' : '0.8');
-    line.setAttribute('opacity', isMajor ? '0.6' : '0.25');
-    line.id = `tick-${i}`;
-    g.appendChild(line);
+// Variable definitions — each has a name, type, current value, and constraints
+const tokens = [
+  { id:'color-accent',  name:'--color-accent',   type:'color',  value:'#5b8cff', comment:'/* Brand / interactive color */' },
+  { id:'color-surface', name:'--color-surface',  type:'color',  value:'#13161e', comment:'/* Card & panel backgrounds */' },
+  { id:'color-border',  name:'--color-border',   type:'color',  value:'#252b3a', comment:'/* Borders & dividers */' },
+  { id:'font-size',     name:'--font-size-base', type:'size',   value:'0.85rem', comment:'/* Base text size */', min:0.6, max:1.3, step:0.05, unit:'rem' },
+  { id:'spacing',       name:'--spacing-card',   type:'size',   value:'12px',    comment:'/* Card row gap & padding */', min:4, max:32, step:2, unit:'px' },
+  { id:'radius',        name:'--radius-card',    type:'size',   value:'8px',     comment:'/* Corner radius */', min:0, max:24, step:1, unit:'px' },
+];
+
+const colorPresets = ['#5b8cff','#ff6b6b','#4ecdc4','#f5c842','#b8a4ff','#ff9f7f','#6ecf94','#ff6ec7','#e8eaf2','#0d0f14','#13161e','#1a1f2c'];
+
+let activeTokenId = null;
+
+function hexToRgbArr(hex) {
+  return [parseInt(hex.slice(1,3),16), parseInt(hex.slice(3,5),16), parseInt(hex.slice(5,7),16)];
+}
+function isValidHex(v) { return /^#[0-9A-Fa-f]{6}$/.test(v); }
+
+// ── Render the fake CSS file ──
+function renderTokenRows() {
+  const container = document.getElementById('tokenRows');
+  const lines = [];
+  // header lines (non-interactive)
+  lines.push({ text:`<span class="ts-comment">/* ── Design Variables ── */</span>`, interactive:false });
+  lines.push({ text:`<span class="ts-sel">:root</span> <span class="ts-brace">{</span>`, interactive:false });
+  lines.push({ text:``, interactive:false }); // blank
+
+  let lineNum = 1;
+  let html = '';
+
+  // comment + blank intro
+  html += makeStaticRow(lineNum++, `<span class="ts-comment">/* ── Design Variables ── */</span>`);
+  html += makeStaticRow(lineNum++, `<span class="ts-sel">:root</span> <span class="ts-brace">{</span>`);
+  html += makeStaticRow(lineNum++, ``);
+
+  tokens.forEach(tok => {
+    // comment line
+    html += makeStaticRow(lineNum++, `  <span class="ts-comment">${tok.comment}</span>`);
+    // editable value line
+    html += makeTokenRow(lineNum++, tok);
+    html += makeStaticRow(lineNum++, ``);
+  });
+
+  html += makeStaticRow(lineNum++, `<span class="ts-brace">}</span>`);
+  container.innerHTML = html;
+}
+
+function makeStaticRow(n, content) {
+  return `<div class="token-row" style="cursor:default">
+    <span class="tr-linenum">${n}</span>
+    <span class="tr-content">${content}</span>
+    <span class="tr-edit-icon"></span>
+  </div>`;
+}
+
+function makeTokenRow(n, tok) {
+  const valSpan = renderValSpan(tok);
+  return `<div class="token-row" id="tr-${tok.id}" onclick="openPopover('${tok.id}',this)">
+    <span class="tr-linenum">${n}</span>
+    <span class="tr-content">  <span class="ts-prop">${tok.name}</span><span class="ts-colon">: </span>${valSpan}<span class="ts-semi">;</span></span>
+    <span class="tr-edit-icon">✎</span>
+    <div class="token-popover" id="pop-${tok.id}" onclick="event.stopPropagation()">
+      ${tok.type === 'color' ? renderColorPopover(tok) : renderSizePopover(tok)}
+    </div>
+  </div>`;
+}
+
+function renderValSpan(tok) {
+  if (tok.type === 'color') {
+    const rgb = hexToRgbArr(tok.value);
+    return `<span class="ts-val color-val" id="val-${tok.id}" style="color:${tok.value};text-shadow:0 0 10px ${tok.value}44">${tok.value}</span>`;
+  }
+  return `<span class="ts-val" id="val-${tok.id}" style="color:#e8c44a">${tok.value}</span>`;
+}
+
+function renderColorPopover(tok) {
+  const swatches = colorPresets.map(c =>
+    `<div class="cs-dot${tok.value===c?' active':''}" style="background:${c}" data-color="${c}" onclick="applyColorSwatch('${tok.id}','${c}',this)" title="${c}"></div>`
+  ).join('');
+  return `
+    <div class="popover-label">Edit ${tok.name}</div>
+    <div class="popover-input-row">
+      <div class="popover-swatch" id="pswatch-${tok.id}" style="background:${tok.value}"></div>
+      <input class="popover-input" id="pinput-${tok.id}" type="text" value="${tok.value}" maxlength="7"
+        oninput="onColorInput('${tok.id}',this.value)"
+        onkeydown="if(event.key==='Enter')applyColorInput('${tok.id}')">
+      <button class="popover-apply" onclick="applyColorInput('${tok.id}')">Apply</button>
+    </div>
+    <div class="color-swatches" id="cswatches-${tok.id}">${swatches}</div>
+    <div class="popover-hint">↑ type a hex code or pick a preset</div>`;
+}
+
+function renderSizePopover(tok) {
+  const numVal = parseFloat(tok.value);
+  return `
+    <div class="popover-label">Edit ${tok.name}</div>
+    <input type="range" class="popover-range" id="prange-${tok.id}"
+      min="${tok.min}" max="${tok.max}" step="${tok.step}" value="${numVal}"
+      oninput="applySizeToken('${tok.id}',this.value+'${tok.unit}',this.value)">
+    <div class="range-labels"><span>${tok.min}${tok.unit}</span><span id="prange-disp-${tok.id}" style="color:#e8c44a;font-family:'JetBrains Mono',monospace">${tok.value}</span><span>${tok.max}${tok.unit}</span></div>
+    <div class="popover-hint">drag to adjust · changes apply instantly</div>`;
+}
+
+// ── Popover open/close ──
+function openPopover(id, rowEl) {
+  // Close others
+  document.querySelectorAll('.token-popover.open').forEach(p => {
+    if (p.id !== 'pop-' + id) p.classList.remove('open');
+  });
+  document.querySelectorAll('.token-row.active').forEach(r => {
+    if (r.id !== 'tr-' + id) r.classList.remove('active');
+  });
+
+  const pop = document.getElementById('pop-' + id);
+  const row = document.getElementById('tr-' + id);
+  const isOpen = pop.classList.toggle('open');
+  row.classList.toggle('active', isOpen);
+  activeTokenId = isOpen ? id : null;
+
+  // Update strip
+  const strip = document.getElementById('activeStrip');
+  const tok = tokens.find(t => t.id === id);
+  if (isOpen && tok) {
+    strip.style.display = 'flex';
+    document.getElementById('ats-token').textContent = tok.name;
+    document.getElementById('ats-val').textContent = tok.value;
+    document.getElementById('active-token-badge').textContent = `editing: ${tok.name}`;
+  } else {
+    strip.style.display = 'none';
+    document.getElementById('active-token-badge').textContent = 'select a token to edit';
   }
 }
 
-/* Live clock */
-function updateClock() {
-  const now = new Date();
-  const h = String(now.getHours()).padStart(2,'0');
-  const m = String(now.getMinutes()).padStart(2,'0');
-  const s = String(now.getSeconds()).padStart(2,'0');
-  document.getElementById('clockTime').textContent = `${h}:${m}:${s}`;
-  const days = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
-  const months = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
-  document.getElementById('clockDate').textContent = `${days[now.getDay()]} ${months[now.getMonth()]} ${now.getDate()}`;
-}
-setInterval(updateClock, 1000);
-updateClock();
+// Close popovers on outside click
+document.addEventListener('click', e => {
+  if (!e.target.closest('.token-row')) {
+    document.querySelectorAll('.token-popover.open').forEach(p => p.classList.remove('open'));
+    document.querySelectorAll('.token-row.active').forEach(r => r.classList.remove('active'));
+    document.getElementById('activeStrip').style.display = 'none';
+    document.getElementById('active-token-badge').textContent = 'select a token to edit';
+    activeTokenId = null;
+  }
+});
 
-let currentClockColor = '#5b8cff';
-
-function hexToRgb(hex) {
-  const r = parseInt(hex.slice(1,3),16);
-  const g = parseInt(hex.slice(3,5),16);
-  const b = parseInt(hex.slice(5,7),16);
-  return {r,g,b};
-}
-
-function applyColorToComponent(hex) {
-  const face = document.getElementById('clockFace');
-  const dot = document.getElementById('clockDot');
-  const time = document.getElementById('clockTime');
-  const ctpVal = document.getElementById('ctpVal');
-  const editorVal = document.getElementById('editorVal');
-  const badge = document.getElementById('token-badge');
-
-  currentClockColor = hex;
-
-  const {r,g,b} = hexToRgb(hex);
-  const shadow = `rgba(${r},${g},${b},0.25)`;
-  const glow = `rgba(${r},${g},${b},0.14)`;
-
-  face.style.borderColor = hex;
-  face.style.boxShadow = `0 0 30px ${shadow}`;
-  dot.style.background = hex;
-  dot.style.boxShadow = `0 0 8px ${hex}`;
-  time.style.color = hex;
-  document.getElementById('clockModule').style.setProperty('--clock-glow', glow);
-
-  ctpVal.textContent = hex;
-  ctpVal.style.color = hex;
-  editorVal.textContent = hex;
-  editorVal.style.color = hex;
-  badge.textContent = `--color-primary: ${hex}`;
-
-  // Update tick colors
-  document.querySelectorAll('#tick-group line').forEach(l => l.setAttribute('stroke', hex));
-
-  // Update hex preview dot
-  document.getElementById('hexPreviewDot').style.background = hex;
-}
-
-function isValidHex(val) {
-  return /^#[0-9A-Fa-f]{6}$/.test(val);
-}
-
-function onHexInput(val) {
-  const dot = document.getElementById('hexPreviewDot');
-  const input = document.getElementById('hexInput');
-  input.classList.remove('error');
-  // Auto-prepend # if missing
-  let v = val;
+// ── Color token editing ──
+function onColorInput(id, raw) {
+  let v = raw.trim();
   if (v && v[0] !== '#') v = '#' + v;
-  if (isValidHex(v)) {
-    dot.style.background = v;
+  document.getElementById('pswatch-' + id).style.background = isValidHex(v) ? v : '';
+}
+
+function applyColorSwatch(id, hex, el) {
+  const tok = tokens.find(t => t.id === id);
+  tok.value = hex;
+  document.getElementById('pinput-' + id).value = hex;
+  document.getElementById('pswatch-' + id).style.background = hex;
+  document.querySelectorAll(`#cswatches-${id} .cs-dot`).forEach(d => d.classList.toggle('active', d.dataset.color === hex));
+  updateValSpan(tok);
+  applyTokensToPreview();
+}
+
+function applyColorInput(id) {
+  let v = (document.getElementById('pinput-' + id).value || '').trim();
+  if (v && v[0] !== '#') v = '#' + v;
+  const input = document.getElementById('pinput-' + id);
+  if (!isValidHex(v)) { input.classList.add('shake'); setTimeout(()=>input.classList.remove('shake'),350); return; }
+  input.value = v;
+  const tok = tokens.find(t => t.id === id);
+  tok.value = v;
+  document.getElementById('pswatch-' + id).style.background = v;
+  document.querySelectorAll(`#cswatches-${id} .cs-dot`).forEach(d => d.classList.toggle('active', d.dataset.color === v));
+  updateValSpan(tok);
+  applyTokensToPreview();
+}
+
+// ── Size token editing ──
+function applySizeToken(id, newVal, numericVal) {
+  const tok = tokens.find(t => t.id === id);
+  tok.value = newVal;
+  const disp = document.getElementById('prange-disp-' + id);
+  if (disp) disp.textContent = newVal;
+  updateValSpan(tok);
+  applyTokensToPreview();
+}
+
+// ── Update the displayed value span in the code row ──
+function updateValSpan(tok) {
+  const span = document.getElementById('val-' + tok.id);
+  if (!span) return;
+  if (tok.type === 'color') {
+    span.textContent = tok.value;
+    span.style.color = tok.value;
+    span.style.textShadow = `0 0 10px ${tok.value}44`;
+  } else {
+    span.textContent = tok.value;
   }
+  // Update strip
+  document.getElementById('ats-val').textContent = tok.value;
 }
 
-function applyHex() {
-  let val = document.getElementById('hexInput').value.trim();
-  if (val && val[0] !== '#') val = '#' + val;
-  const input = document.getElementById('hexInput');
-  if (!isValidHex(val)) {
-    input.classList.add('error');
-    setTimeout(() => input.classList.remove('error'), 500);
-    return;
-  }
-  input.value = val;
-  applyColorToComponent(val);
-  // Deselect all presets
-  document.querySelectorAll('.preset-swatch').forEach(s => s.classList.remove('active'));
-  const match = document.querySelector(`.preset-swatch[data-hex="${val}"]`);
-  if (match) match.classList.add('active');
+// ── Apply all tokens to the preview card UI ──
+function applyTokensToPreview() {
+  const get = id => tokens.find(t => t.id === id).value;
+  const accent = get('color-accent');
+  const surface = get('color-surface');
+  const border = get('color-border');
+  const fontSize = get('font-size');
+  const spacing = get('spacing');
+  const radius = get('radius');
+
+  const root = document.getElementById('cardUI');
+  const spacingNum = parseFloat(spacing);
+  const spacingPx = spacing.endsWith('rem') ? spacing : spacing;
+
+  // Convert accent to rgb for rgba usage
+  const [ar,ag,ab] = hexToRgbArr(accent);
+
+  root.style.setProperty('--preview-accent', accent);
+  root.style.setProperty('--preview-accent-rgb', `${ar} ${ag} ${ab}`);
+  root.style.setProperty('--preview-surface', surface);
+  root.style.setProperty('--preview-border', border);
+  root.style.setProperty('--preview-font-size', fontSize);
+  root.style.setProperty('--preview-spacing', spacingPx);
+  root.style.setProperty('--preview-radius', radius);
+
+  // Flash the preview
+  root.classList.remove('preview-flash');
+  void root.offsetWidth;
+  root.classList.add('preview-flash');
 }
 
-function applyPreset(el) {
-  const hex = el.dataset.hex;
-  document.getElementById('hexInput').value = hex;
-  document.querySelectorAll('.preset-swatch').forEach(s => s.classList.remove('active'));
-  el.classList.add('active');
-  applyColorToComponent(hex);
+// ── Deal cards in the preview ──
+const SUITS_P = ['♠','♥','♦','♣'];
+const RANKS_P = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+
+function dealPreviewCards() {
+  const deck = SUITS_P.flatMap(s => RANKS_P.map(r => ({s,r,red:s==='♥'||s==='♦'})));
+  for (let i=deck.length-1;i>0;i--){const j=Math.trunc(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
+  const hand = deck.slice(0,5);
+  const row = document.getElementById('cuiCardRow');
+  row.innerHTML = '';
+  hand.forEach((card,i) => {
+    const el = document.createElement('div');
+    el.className = `cui-card ${card.red?'red':'black'}`;
+    el.style.cssText = 'opacity:0;transform:translateY(10px)';
+    el.innerHTML = `<span class="cui-card-rank">${card.r}</span><span class="cui-card-suit">${card.s}</span><span class="cui-card-rank-bot">${card.r}</span>`;
+    row.appendChild(el);
+    setTimeout(()=>{el.style.cssText='transition:opacity .25s,transform .25s;opacity:1;transform:none';},i*60+30);
+  });
 }
 
-buildClockFace();
+// Init
+renderTokenRows();
+dealPreviewCards();
+applyTokensToPreview();
 
 
 /* ════════════════════════════════════════════
@@ -1083,7 +1267,7 @@ function stepAction(n) {
       resp.className = 'chat-msg chat-ai';
       resp.innerHTML = `<div class="chat-label">CLAUDE (via Figma MCP)</div>
         I've read your Figma file via MCP. Found:<br>
-        • <strong style="color:#7eb5ff">6 color tokens</strong> (Primary, Danger, Surface, BG, Border, Text)<br>
+        • <strong style="color:#7eb5ff">6 color variables</strong> (Primary, Danger, Surface, BG, Border, Text)<br>
         • <strong style="color:#7eb5ff">3 text styles</strong> (Heading/H1, Body/Default, Label/Mono)<br>
         • <strong style="color:#7eb5ff">PlayingCard component</strong> — vertical Auto Layout, 80×120px, 2 variants (red/black), hover interaction<br>
         • <strong style="color:#7eb5ff">CardRow frame</strong> — horizontal Auto Layout, gap:16, padding:24<br><br>
@@ -1107,7 +1291,7 @@ function stepAction(n) {
         <code style="font-family:monospace;background:rgba(0,0,0,.3);padding:.1em .4em;border-radius:3px;display:block;margin:.3rem 0">tokens.css</code>
         <code style="font-family:monospace;background:rgba(0,0,0,.3);padding:.1em .4em;border-radius:3px;display:block;margin:.3rem 0">PlayingCard.css</code>
         <code style="font-family:monospace;background:rgba(0,0,0,.3);padding:.1em .4em;border-radius:3px;display:block;margin:.3rem 0">PlayingCard.js</code>
-        <br>All tokens match your Figma styles exactly. Hover interaction maps to <code style="font-family:monospace;background:rgba(0,0,0,.3);padding:.1em .4em;border-radius:3px">.card:hover</code> translateY(-10px).`;
+        <br>All variables match your Figma styles exactly. Hover interaction maps to <code style="font-family:monospace;background:rgba(0,0,0,.3);padding:.1em .4em;border-radius:3px">.card:hover</code> translateY(-10px).`;
       chat.appendChild(resp);
     }, 2000);
   }
